@@ -75,6 +75,7 @@ const express = require('express');
       const puppeteer = require('puppeteer');
 
 const app = express();
+app.use(express.json());
 
 app.use(bodyParser.json());
 
@@ -384,3 +385,5 @@ async function test(){
 app.listen(PORT, () => {
   console.log(`'Server is running on http://localhost:${PORT}`);
 });
+
+module.exports = app;
