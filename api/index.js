@@ -7,7 +7,6 @@ const app = express();
 app.use(bodyParser.json());
 
 const port = process.env.PORT || 3001;
-
 // Global variable to store the API token
 let apiToken = '';
 let outputcontent='';
@@ -17,6 +16,15 @@ let outputcontent='';
  * @returns {Promise} A promise that resolves after the specified time.
  */
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const currentDateTime = new Date(now.getTime() - 1000); // 5,000 milliseconds
+const smsDateTime = datetimeStr => {
+  const [date, time] = datetimeStr.split('.');
+  const milliseconds = time.slice(0, 3);
+  const timezoneMatch = time.match(/([+-]\d{2}:\d{2})$/);
+  const timezone = timezoneMatch ? timezoneMatch[1] : 'Z';
+  return `${date}.${milliseconds}${timezone}`;
+};
+
 /**
  * Fetches SMS containing a Google verification code for the specified mobile number.
  * 
@@ -45,8 +53,9 @@ async function fetchSMS(mobile, apiKey, email) {
         for (const sms of response.data) {
           if (sms.smsContent) {
             const message = sms.smsContent;
+            cosnt msgDtTime = smsDateTime(sms.createdAt)
             console.log(`Received SMS: ${message}`);
-            if (message.includes('Google verification')) {
+            if (message.includes('Google verification') && msgDtTime > currentDateTime) {
               // Extract the first sequence of digits from the message
               code = message.replace(/.*?(\d+).*/, '$1')
               console.log(`SMS Content Found: ${code}`);
@@ -364,9 +373,7 @@ async function createGoogleAccount(body) {
     console.log('Waiting for Google to send the verification code...');
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
     if(verificationCode){
-     //  const verificationCode = "112211"
      console.log('Entering the verification code...');
-     
      await page.waitForSelector('#code',  { visible: true });
      await page.type('input[id="code"]', verificationCode);
  
