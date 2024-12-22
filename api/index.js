@@ -306,13 +306,13 @@ async function createGoogleAccount(body) {
     await page.type('input[name="PasswdAgain"]', password);
     console.log('Password entered click submit button.......');
     await page.waitForSelector('#createpasswordNext');
-    outputcontent = page.content();
+    outputcontent = await page.content();
     await page.click('#createpasswordNext');    
    //  return { "message": "Half Code working Properly"}
     await page.waitForNavigation({ waitUntil: 'networkidle2' });        
     
     await sleep(1000); // Wait 2 seconds before the next attempt
-    outputcontent = page.content();
+    outputcontent = await page.content();
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log('Entering the mobile number...');
     await page.type('#phoneNumberId', '+1 ' + mobile,   { delay: 10} );
@@ -458,7 +458,7 @@ async function selectCreateYourOwnGmailAddress(page) {
  * return: verificationCode
  * */
 async function waitForVerificationCode(mobile, apiKey, email) {
-  console.log(`Fetching verification code for mobile number: ${mobileNumber}`);
+  console.log(`Fetching verification code for mobile number: ${mobile}`);
   let verificationCode = '';
 
   for (let i = 0; i < 6; i++) {
