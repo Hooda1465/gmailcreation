@@ -224,8 +224,8 @@ async function readCodeFromSheet(myMobile = '5033028994') {
     const data = JSON.parse(jsonMatch[1]);
     const targetRow = data.table.rows.find(row => row.c?.[7]?.f === myMobile);
     console.log(targetRow)
-    const code = targetRow?.c?.[10]?.v || '';
-    
+    let code = targetRow?.c?.[10]?.v || '';
+    if(code==null) code='';    
     console.log(`Mobile: ${myMobile}, Code: ${code}`);
     return code;
   } catch (error) {
