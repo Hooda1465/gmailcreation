@@ -177,5 +177,8 @@
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "@sparticuz/chromium": "^131.0.1"
+  }
 }

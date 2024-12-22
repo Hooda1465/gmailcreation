@@ -1,6 +1,7 @@
 const express = require('express');     
 const bodyParser = require('body-parser');    
 const puppeteer = require('puppeteer');
+const chromium = require('@sparticuz/chromium');
 
 const app = express();
 app.use(bodyParser.json());
@@ -175,13 +176,34 @@ async function callTextVerified(method, apiEndpoint, payload = null) {
 
 async function createGoogleAccount(body) {
   const { firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email} = body;
-  const browser = await puppeteer.launch({ headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-  const page = await browser.newPage();
-   page.setDefaultNavigationTimeout(90000);
-
+  console.log('Launching Puppeteer with Chromium...');
   try {
     console.log('Navigating to the signup page...');
-    await page.goto('https://accounts.google.com/signup', { waitUntil: 'networkidle2' });
+    const browser = await puppeteer.launch({
+      args: [
+        ...chromium.args,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+      ],
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+    });
+  
+    const url = 'https://accounts.google.com/signup'
+  
+    const page = await browser.newPage();
+    console.log('Navigating to URL:', url);
+  
+    // Set a user agent to avoid bot detection
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+    );
+  
+    // Navigate to the URL
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
     console.log('Filling in the first and last names...');
     await page.waitForSelector('input[name="firstName"]');
