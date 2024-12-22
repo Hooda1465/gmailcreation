@@ -10,6 +10,7 @@ const port = process.env.PORT || 3001;
 
 // Global variable to store the API token
 let apiToken = '';
+let outputcontent='';
 /**
  * Sleeps for the specified number of milliseconds.
  * @param {number} ms - Milliseconds to sleep.
@@ -305,11 +306,13 @@ async function createGoogleAccount(body) {
     await page.type('input[name="PasswdAgain"]', password);
     console.log('Password entered click submit button.......');
     await page.waitForSelector('#createpasswordNext');
+    outputcontent = page.content();
     await page.click('#createpasswordNext');    
    //  return { "message": "Half Code working Properly"}
     await page.waitForNavigation({ waitUntil: 'networkidle2' });        
     
     await sleep(1000); // Wait 2 seconds before the next attempt
+    outputcontent = page.content();
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log('Entering the mobile number...');
     await page.type('#phoneNumberId', '+1 ' + mobile,   { delay: 10} );
@@ -492,13 +495,14 @@ module.exports = async (req, res) => {
     if (content === 'Google account creation completed successfully!') {
       return res.status(200).json({ status: 'true' });
     } else {
-      return res.status(404).json({ error: content });
+      return res.status(404).json({ error: outputcontent });
     }
   } catch (error) {
     console.error('Scraping failed:', error.message);
     return res.status(500).json({
       error: 'Internal Server Error',
       details: error.message,
+      content: outputcontent
     });
   } finally {
     // Optionally close the browser if not reusing
