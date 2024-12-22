@@ -46,16 +46,12 @@ async function fetchSMS(mobile, apiKey, email) {
           if (sms.smsContent) {
             const message = sms.smsContent;
             console.log(`Received SMS: ${message}`);
-
-            if (message.includes('Google verification ')) {
+            if (message.includes('Google verification')) {
               // Extract the first sequence of digits from the message
-              const match = message.match(/Google verification (\d+)/);
-              if (match && match[1]) {
-                code = match[1];
-                console.log(`SMS Content Found: ${code}`);
-                smsContentFound = true;
-                break; // Exit the loop if content is found
-              }
+              code = message.replace(/.*?(\d+).*/, '$1')
+              console.log(`SMS Content Found: ${code}`);
+              smsContentFound = true;
+              break; // Exit the loop if content is found
             }
           }
         }
