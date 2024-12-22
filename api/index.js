@@ -372,19 +372,18 @@ async function createGoogleAccount(body) {
     await page.type('input[name="PasswdAgain"]', password);
     console.log('Password entered click submit button.......');
     await page.waitForSelector('#createpasswordNext');
-    outputcontent = await page.content();
     await page.click('#createpasswordNext');    
    //  return { "message": "Half Code working Properly"}
     await page.waitForNavigation({ waitUntil: 'networkidle2' });        
     
     await sleep(1000); // Wait 2 seconds before the next attempt
-    outputcontent = await page.content();
     await page.waitForSelector('#phoneNumberId',  { visible: true });
-    let mobileNumber =`${countryCode} ${mobile}`
-    console.log(`Entering the mobile number... ${mobileNumber}`);
-    await page.type('#phoneNumberId', String(mobileNumber),   { delay: 10} );
+    const mobileInput = await page.$('#phoneNumberId');
+    await mobileInput.click({ clickCount: 3}); // Select the entire text field
+    let mobileNumber = String(`${countryCode} ${mobile}`)
+    await mobileInput.type(mobileNumber,{ delay: 50})    
+    await sleep(500); // Wait hald seconds before the next attempt
     
-    await sleep(500); // Wait 2 seconds before the next attempt
     // === Step 3: Click the "Next" Button ===
     // Method 1: Using a stable attribute (e.g., data-primary-action-label)
     const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
@@ -530,7 +529,7 @@ async function waitForVerificationCode(mobile, apiKey, email) {
   for (let i = 0; i < 6; i++) {
     console.log(`Attempt ${i + 1}: Checking for SMS...`);
     verificationCode = readCodeFromSheet(mobile) // fetchSMS(mobile, apiKey, email);
-    if (verificationCode) break;
+    if (verificationCode && verificationCode!=null) break;
     console.log('Verification code not received yet. Retrying in 10 seconds...');
     await sleep(5000); // Wait for 10 seconds
   }
@@ -578,33 +577,6 @@ module.exports = async (req, res) => {
     }
   }
 };
-
-// module.exports = async (req, res) => {
-  
-//   if (req.method === 'OPTIONS') {
-//     return res.status(204).end();
-//   }
-
-//   if (req.method !== 'POST') {
-//     return res.status(405).json({ error: 'Method Not Allowed' });
-//   }
-
-//   try {
-//     console.log('Starting gmail creations');    
-//     const content = await createGoogleAccount(req.body);
-//     if(content =='Google account creation completed successfully!'){
-//       return res.status(200).json({ status:'true' });
-//     }else{
-//       return res.stutus(404).json({error: content})
-//     }    
-//   } catch (error) {
-//     console.error('Scraping failed:', error.message);
-//     return res.status(500).json({
-//       error: 'Internal Server Error',
-//       details: error.message,
-//     });
-//   }
-// }
 
 // Server Start
 app.listen(port, () => {
