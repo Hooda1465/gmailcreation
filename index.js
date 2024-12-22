@@ -175,7 +175,8 @@ async function callTextVerified(method, apiEndpoint, payload = null) {
  */
 
 async function createGoogleAccount(body) {
-  const { firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email} = body;
+  const { firstName, lastName, username, password, gender, dob, mobile, apiKey, email} = body;
+  const [ year, month, day] = dob.split('-');
   console.log(firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email)
   console.log('Launching Puppeteer with Chromium...');
   try {
