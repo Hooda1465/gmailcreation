@@ -293,13 +293,13 @@ async function createGoogleAccount(body) {
     console.log('Setting up the password...');
 
     await page.waitForSelector('input[name="Passwd"]',  { visible: true });    
-    await new Promise(resolve => setTimeout(resolve, 500)); // 1 second
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
     await page.waitForSelector('input[name="PasswdAgain"]',  { visible: true });
     console.log('Entering the password...');
 
     const passInput = await page.$('input[name="Passwd"]');
     await passInput.click({ clickCount: 3}); // Select the entire text field
-    await passInput.type(password,{ delay: 10})
+    await passInput.type(password,{ delay: 50})
     
     // await page.type('input[name="Passwd"]', password);
     await page.type('input[name="PasswdAgain"]', password);
@@ -309,7 +309,7 @@ async function createGoogleAccount(body) {
    //  return { "message": "Half Code working Properly"}
     await page.waitForNavigation({ waitUntil: 'networkidle2' });        
     
-    await sleep(500); // Wait 2 seconds before the next attempt
+    await sleep(1000); // Wait 2 seconds before the next attempt
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log('Entering the mobile number...');
     await page.type('#phoneNumberId', '+1 ' + mobile,   { delay: 10} );
@@ -319,7 +319,7 @@ async function createGoogleAccount(body) {
     // Method 1: Using a stable attribute (e.g., data-primary-action-label)
     const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
     // Wait for the "Next" button to be clickable
-    await page.waitForSelector(nextButtonSelector, { state: 'visible', timeout: 3000 });
+    await page.waitForSelector(nextButtonSelector, { state: 'visible', timeout: 1000 });
     // Scroll the "Next" button into view to ensure it's interactable
     await page.evaluate((selector) => {
       const button = document.querySelector(selector);
@@ -369,13 +369,14 @@ async function createGoogleAccount(body) {
  
      return 'Google account creation completed successfully!';
     }else{
-      return 'Verification code failed';
+      return await page.content();
     }
   } catch (error) {
     console.error('An error occurred:', error.message);
   } finally {
     console.log('Closing the browser...');
-    await browser.close();
+    return await page.content()
+    // await browser.close();
   }
 }
 
