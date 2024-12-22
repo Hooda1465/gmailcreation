@@ -379,7 +379,7 @@ async function createGoogleAccount(body) {
     const mobileInput = await page.$('#phoneNumberId');
     await mobileInput.click({ clickCount: 3}); // Select the entire text field
     let mobileNumber = String(`${countryCode} ${mobile}`);
-    console.log(`Entered Mobile Number is : ${mobileNumber}`
+    console.log(`Entered Mobile Number is : ${mobileNumber}`)
     await mobileInput.type(mobileNumber,{ delay: 25})    
     await sleep(500); // Wait hald seconds before the next attempt
     
