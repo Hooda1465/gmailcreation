@@ -1,10 +1,10 @@
 {
   "functions": {
-    "api/test.js": {
-      "maxDuration": 60 // This function can run for a maximum of 30 seconds
+    "index.js": {
+      "maxDuration": 60
     },
-    "src/api/*.js": {
-      "maxDuration": 60 // You must prefix functions in the src directory with /src/
+    "src/*.js": {
+      "maxDuration": 60
     }
   }
 }
