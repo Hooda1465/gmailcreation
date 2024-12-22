@@ -275,6 +275,7 @@ async function createGoogleAccount(body) {
   console.log(firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email, countryCode)
   console.log('Launching Puppeteer with Chromium...');
   try {
+    const mobileNumber = `${countryCode} ${mobile}`
     console.log('Navigating to the signup page...');
     const browserInstance = await getBrowser();
     const page = await browserInstance.newPage();
@@ -350,7 +351,7 @@ async function createGoogleAccount(body) {
     console.log('Waiting for the Username page...');
     await page.waitForSelector('input[name="Username"]', { visible: true });
     await page.type('input[name="Username"]', username, { delay: 10 });  
-    await sleep(500); // Wait hald seconds before the next attempt
+    await sleep(1000); // Wait hald seconds before the next attempt
     console.log('Clicking the "Next" button...');
     await page.click('#next');
 
@@ -358,36 +359,32 @@ async function createGoogleAccount(body) {
     console.log('Setting up the password...');
 
     await page.waitForSelector('input[name="Passwd"]',  { visible: true });    
-    await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
+    await sleep(3000);; // 1 second
     await page.waitForSelector('input[name="PasswdAgain"]',  { visible: true });
     console.log('Entering the password...');
 
     const passInput = await page.$('input[name="Passwd"]');
     await passInput.click({ clickCount: 3}); // Select the entire text field
-    await passInput.type(password,{ delay: 50})    
-    await sleep(500); // Wait hald seconds before the next attempt
+    await passInput.type(password,{ delay: 30})
+    
     // await page.type('input[name="Passwd"]', password);
     await page.type('input[name="PasswdAgain"]', password);
     console.log('Password entered click submit button.......');
     await page.waitForSelector('#createpasswordNext');
     await page.click('#createpasswordNext');    
-   //  return { "message": "Half Code working Properly"}
-    await page.waitForNavigation({ waitUntil: 'networkidle2' });        
     
-    await sleep(1000); // Wait 2 seconds before the next attempt
+    await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
-    const mobileInput = await page.$('#phoneNumberId');
-    await mobileInput.click({ clickCount: 3}); // Select the entire text field
-    let mobileNumber = String(`${countryCode} ${mobile}`);
-    console.log(`Entered Mobile Number is : ${mobileNumber}`)
-    await mobileInput.type(mobileNumber,{ delay: 25})    
-    await sleep(500); // Wait hald seconds before the next attempt
-    
+    console.log(`Entering the mobile number... : ${mobileNumber}`);
+    await page.type('#phoneNumberId', mobileNumber,   { delay: 50} );    
+    await sleep(2000); // 1 second
     // === Step 3: Click the "Next" Button ===
     // Method 1: Using a stable attribute (e.g., data-primary-action-label)
     const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
     // Wait for the "Next" button to be clickable
-    await page.waitForSelector(nextButtonSelector, { state: 'visible', timeout: 1000 });
+    await page.waitForSelector(nextButtonSelector, { state: 'visible', timeout: 3000 });
     // Scroll the "Next" button into view to ensure it's interactable
     await page.evaluate((selector) => {
       const button = document.querySelector(selector);
@@ -399,9 +396,10 @@ async function createGoogleAccount(body) {
     await page.click(nextButtonSelector);
 
     console.log('Next button clicked!');
-
-    await sleep(500); // Wait 2 seconds before the next attempt
+    
+    await sleep(2000);; // 1 second
     console.log('Waiting for Google to send the verification code...');
+
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
     if(verificationCode && verificationCode!=null){
      console.log('Entering the verification code...');
