@@ -390,19 +390,20 @@ async function createGoogleAccount(body) {
      await sleep(500);
      await page.click('#recoverySkip');
      
+     console.log('Recovery Skipped');
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
  
-     await page.waitForSelector('div[data-primary-action-label="Next"] button');
-     
-     await new Promise(resolve => setTimeout(resolve, 500)); // 2 seconds
+     await page.waitForSelector('div[data-primary-action-label="Next"] button');     
+     console.log('Recovery Skipped');
+     await sleep(500); 
      await page.click('div[data-primary-action-label="Next"] button');
- 
+     
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
      await page.waitForSelector('div [data-primary-action-label="I agree"] button');
-     
-     await new Promise(resolve => setTimeout(resolve, 500)); // 2 seconds
+     console.log('Wating for agreement Policy');
+     await sleep(500); 
      await page.click('div [data-primary-action-label="I agree"] button');
- 
+     console.log('Agreed Policy Done'); 
      return 'Google account creation completed successfully!';
     }else{
       return await page.content();
