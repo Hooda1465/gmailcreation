@@ -174,7 +174,7 @@ async function callTextVerified(method, apiEndpoint, payload = null) {
  */
 
 async function createGoogleAccount(body) {
-  const [ firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email] = body;
+  const { firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email} = body;
   const browser = await puppeteer.launch({ headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   const page = await browser.newPage();
    page.setDefaultNavigationTimeout(90000);
