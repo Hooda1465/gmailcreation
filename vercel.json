@@ -2,9 +2,9 @@
   "version": 2,
   "builds": [
     {
-      "src": "/index.js",
+      "src": "index.js",
       "use": "@vercel/node",
-      "config": { "maxDuration": 120 }
+      "config": { "maxDuration": 60 }
     }
   ],
   "routes": [
