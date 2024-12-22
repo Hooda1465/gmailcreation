@@ -365,8 +365,8 @@ async function createGoogleAccount(body) {
 
     const passInput = await page.$('input[name="Passwd"]');
     await passInput.click({ clickCount: 3}); // Select the entire text field
-    await passInput.type(password,{ delay: 50})
-    
+    await passInput.type(password,{ delay: 50})    
+    await sleep(500); // Wait hald seconds before the next attempt
     // await page.type('input[name="Passwd"]', password);
     await page.type('input[name="PasswdAgain"]', password);
     console.log('Password entered click submit button.......');
