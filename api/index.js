@@ -380,8 +380,9 @@ async function createGoogleAccount(body) {
     await sleep(1000); // Wait 2 seconds before the next attempt
     outputcontent = await page.content();
     await page.waitForSelector('#phoneNumberId',  { visible: true });
-    console.log('Entering the mobile number...');
-    await page.type('#phoneNumberId', String(`${countryCode} ${mobile}`),   { delay: 10} );
+    mobile =`"${countryCode} ${mobile}"`
+    console.log(`Entering the mobile number... ${mobile}`);
+    await page.type('#phoneNumberId', mobile),   { delay: 10} );
     
     await sleep(500); // Wait 2 seconds before the next attempt
     // === Step 3: Click the "Next" Button ===
