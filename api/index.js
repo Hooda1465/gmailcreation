@@ -238,10 +238,10 @@ async function createGoogleAccount(body) {
 
     console.log('Filling in the first and last names...');
     await page.waitForSelector('input[name="firstName"]');
-    await page.type('input[name="firstName"]', firstName, { delay: 50 });
+    await page.type('input[name="firstName"]', firstName, { delay: 10 });
     await sleep(2000); // Wait 2 seconds before the next attempt
     await page.waitForSelector('input[name="lastName"]');
-    await page.type('input[name="lastName"]', lastName, { delay: 50 });
+    await page.type('input[name="lastName"]', lastName, { delay: 10 });
 
     console.log('Clicking the "Next" button...');
     await page.waitForSelector('#collectNameNext');
@@ -251,25 +251,25 @@ async function createGoogleAccount(body) {
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
     console.log('Filling in birth date and gender...');
-    await page.waitForSelector('#month', { delay: 50 });
+    await page.waitForSelector('#month', { delay: 10 });
     await page.select('#month',String(month));
     
-    await sleep(1000); // Wait 2 seconds before the next attempt
+    await sleep(500); // Wait 2 seconds before the next attempt
     
     await page.waitForSelector('input[name="day"]',  { visible: true });    
-    await page.type('input[name="day"]', String(day), { delay: 25 }); 
+    await page.type('input[name="day"]', String(day), { delay: 10 }); 
     
-    await sleep(1000); // Wait 2 seconds before the next attempt
+    await sleep(500); // Wait 2 seconds before the next attempt
    
-    await page.waitForSelector('#year', { delay: 25 });
+    await page.waitForSelector('#year', { delay: 10 });
     await page.type('#year', String(year));
     
-    await sleep(1000); // Wait 1 seconds before the next attempt
+    await sleep(500); // Wait 1 seconds before the next attempt
 
-    await page.waitForSelector('#gender', { delay: 50 });
+    await page.waitForSelector('#gender', { delay: 10 });
     await page.select('#gender', String(gender)); // male    
     
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    await sleep(500); // Wait 2 seconds before the next attempt
 
     await page.waitForSelector('#birthdaygenderNext');
     await page.click('#birthdaygenderNext');
@@ -284,8 +284,8 @@ async function createGoogleAccount(body) {
     }
     console.log('Waiting for the Username page...');
     await page.waitForSelector('input[name="Username"]', { visible: true });
-    await page.type('input[name="Username"]', username, { delay: 50 });  
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    await page.type('input[name="Username"]', username, { delay: 10 });  
+    await sleep(500); // Wait hald seconds before the next attempt
     console.log('Clicking the "Next" button...');
     await page.click('#next');
 
@@ -293,13 +293,13 @@ async function createGoogleAccount(body) {
     console.log('Setting up the password...');
 
     await page.waitForSelector('input[name="Passwd"]',  { visible: true });    
-    await new Promise(resolve => setTimeout(resolve, 3000)); // 1 second
+    await new Promise(resolve => setTimeout(resolve, 500)); // 1 second
     await page.waitForSelector('input[name="PasswdAgain"]',  { visible: true });
     console.log('Entering the password...');
 
     const passInput = await page.$('input[name="Passwd"]');
     await passInput.click({ clickCount: 3}); // Select the entire text field
-    await passInput.type(password,{ delay: 50})
+    await passInput.type(password,{ delay: 10})
     
     // await page.type('input[name="Passwd"]', password);
     await page.type('input[name="PasswdAgain"]', password);
@@ -309,17 +309,17 @@ async function createGoogleAccount(body) {
    //  return { "message": "Half Code working Properly"}
     await page.waitForNavigation({ waitUntil: 'networkidle2' });        
     
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    await sleep(500); // Wait 2 seconds before the next attempt
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log('Entering the mobile number...');
-    await page.type('#phoneNumberId', mobile,   { delay: 50} );
+    await page.type('#phoneNumberId', mobile,   { delay: 10} );
     
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    await sleep(500); // Wait 2 seconds before the next attempt
     // === Step 3: Click the "Next" Button ===
     // Method 1: Using a stable attribute (e.g., data-primary-action-label)
     const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
     // Wait for the "Next" button to be clickable
-    await page.waitForSelector(nextButtonSelector, { state: 'visible', timeout: 10000 });
+    await page.waitForSelector(nextButtonSelector, { state: 'visible', timeout: 3000 });
     // Scroll the "Next" button into view to ensure it's interactable
     await page.evaluate((selector) => {
       const button = document.querySelector(selector);
@@ -332,7 +332,7 @@ async function createGoogleAccount(body) {
 
     console.log('Next button clicked!');
 
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    await sleep(500); // Wait 2 seconds before the next attempt
     console.log('Waiting for Google to send the verification code...');
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
     if(verificationCode){
@@ -342,7 +342,7 @@ async function createGoogleAccount(body) {
      await page.waitForSelector('#code',  { visible: true });
      await page.type('input[id="code"]', verificationCode);
  
-     await sleep(2000); // Wait 2 seconds before the next attempt
+     await sleep(500); // Wait 2 seconds before the next attempt
  
      await page.waitForSelector('#next');
      await page.click('#next');
@@ -351,20 +351,20 @@ async function createGoogleAccount(body) {
      
      await page.waitForSelector('#recoverySkip');
  
-     await sleep(2000);
+     await sleep(500);
      await page.click('#recoverySkip');
      
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
  
      await page.waitForSelector('div[data-primary-action-label="Next"] button');
      
-     await new Promise(resolve => setTimeout(resolve, 2000)); // 2 seconds
+     await new Promise(resolve => setTimeout(resolve, 500)); // 2 seconds
      await page.click('div[data-primary-action-label="Next"] button');
  
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
      await page.waitForSelector('div [data-primary-action-label="I agree"] button');
      
-     await new Promise(resolve => setTimeout(resolve, 1000)); // 2 seconds
+     await new Promise(resolve => setTimeout(resolve, 500)); // 2 seconds
      await page.click('div [data-primary-action-label="I agree"] button');
  
      return 'Google account creation completed successfully!';
@@ -384,7 +384,7 @@ async function selectCreateYourOwnGmailAddress(page) {
          
   try {
     console.log('Waiting for Gmail address selection options...');
-    await page.waitForSelector('div[role="radiogroup"]', { timeout: 20000 });
+    await page.waitForSelector('div[role="radiogroup"]', { timeout: 5000 });
     const radio = await page.$('div[role="radiogroup"]');
     console.log(radio)
     if(radio!=null){
@@ -430,7 +430,7 @@ async function selectCreateYourOwnGmailAddress(page) {
   
           // Optional: Wait for some feedback after the click, e.g., for the username field to appear
           console.log('Waiting for the username field to appear...');
-          await page.waitForSelector('input[name="Username"]', { visible: true, timeout: 50000 });
+          await page.waitForSelector('input[name="Username"]', { visible: true, timeout: 5000 });
           
           console.log('Username field is now visible.');
           return true;
@@ -439,10 +439,10 @@ async function selectCreateYourOwnGmailAddress(page) {
       }
    }
    else{
-      await page.waitForSelector('input[name="Username"]', { visible: true, timeout: 10000 });
+      await page.waitForSelector('input[name="Username"]', { visible: true, timeout: 5000 });
    }
   } catch (error) {
-    await page.waitForSelector('input[name="Username"]', { visible: true, timeout: 10000 });
+    await page.waitForSelector('input[name="Username"]', { visible: true, timeout: 5000 });
     console.error('Error selecting "Create your own Gmail address":', error.message);
   //    return false;
   }
@@ -462,7 +462,7 @@ async function waitForVerificationCode(mobile, apiKey, email) {
     verificationCode = fetchSMS(mobile, apiKey, email);
     if (verificationCode) break;
     console.log('Verification code not received yet. Retrying in 10 seconds...');
-    await sleep(10000); // Wait for 10 seconds
+    await sleep(5000); // Wait for 10 seconds
   }
   // if (!verificationCode) throw new Error('Failed to retrieve verification code.');
   return verificationCode;
