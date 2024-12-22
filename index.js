@@ -298,7 +298,7 @@ async function createGoogleAccount(body) {
      
      await page.waitForSelector('#recoverySkip');
  
-     await new Promise(resolve => setTimeout(resolve, 2000)); // 2 seconds
+     await sleep(2000);
      await page.click('#recoverySkip');
      
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
