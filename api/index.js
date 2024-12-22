@@ -17,11 +17,12 @@ let outputcontent='';
  * @returns {Promise} A promise that resolves after the specified time.
  */
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 /**
  * Fetches SMS containing a Google verification code for the specified mobile number.
  * 
  * @param {string} mobile - The mobile number to fetch SMS for.
+ * @param {string} apiKey - The API key for authentication.
+ * @param {string} email - The email associated with the API key.
  * @returns {Promise<string>} The extracted verification code.
  * @throws Will throw an error if fetching SMS fails.
  */
@@ -79,34 +80,46 @@ async function fetchSMS(mobile, apiKey, email) {
 /**
  * Obtains an authentication token from the TextVerified API.
  * 
+ * @param {string} apiKey - The API key for authentication.
+ * @param {string} email - The email associated with the API key.
  * @returns {Promise<boolean>} True if token is successfully obtained, else false.
  */
 async function getToken(apiKey, email) {
   const url = 'https://www.textverified.com/api/pub/v2/auth';
+  
   const headers = {
     'Accept': 'application/json',
     'X-API-KEY': apiKey,
     'X-API-USERNAME': email,
+    'Content-Type': 'application/json', // Ensure Content-Type is set
   };
 
   try {
-    const response = await axios.post(url, {}, { headers });
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({}), // Sending an empty JSON body
+      timeout: 30000, // Note: Native fetch doesn't support timeout directly
+    });
 
-    if (response.status === 200 && response.data && response.data.token) {
-      apiToken = response.data.token;
+    if (!response.ok) { // response.ok is true for status in the range 200-299
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Failed to obtain API token. Response:', errorData);
+      return false;
+    }
+
+    const data = await response.json();
+    if (data && data.token) {
+      apiToken = data.token;
       console.log('Successfully obtained API token.');
       return true;
     } else {
-      console.error('Failed to obtain API token. Response:', response.data);
+      console.error('Failed to obtain API token. Response:', data);
       return false;
     }
 
   } catch (error) {
-    if (error.response) {
-      console.error(`API responded with status ${error.response.status}:`, error.response.data);
-    } else {
-      console.error('Error while calling API:', error.message);
-    }
+    console.error('Error while calling API:', error.message);
     return false;
   }
 }
@@ -122,45 +135,61 @@ async function getToken(apiKey, email) {
  */
 async function callTextVerified(method, apiEndpoint, payload = null) {
   const baseUrl = 'https://www.textverified.com';
-  const url = apiEndpoint.startsWith(baseUrl) ? apiEndpoint : `${baseUrl}${apiEndpoint}`;
+  const url = apiEndpoint.startsWith('http') ? apiEndpoint : `${baseUrl}${apiEndpoint}`;
   
   const headers = {
     'Accept': 'application/json',
     'Authorization': `Bearer ${apiToken}`,
   };
 
+  // Initialize fetch options
   const options = {
     method: method.toUpperCase(),
-    url,
-    headers,
-    // Timeout after 30 seconds
-    timeout: 30000,
-    validateStatus: function (status) {
-      // Resolve only if the status code is less than 500
-      return status < 500;
-    }
+    headers: headers,
+    // Note: fetch does not support timeout directly. To implement timeout, you'd need to use AbortController.
   };
 
   // Add payload and Content-Type header if applicable
   if (payload && ['POST', 'PUT', 'PATCH'].includes(options.method)) {
-    options.data = payload;
+    options.body = JSON.stringify(payload);
     headers['Content-Type'] = 'application/json';
   }
 
+  // Implementing timeout using AbortController
+  const controller = new AbortController();
+  const timeout = 30000; // 30 seconds
+
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, timeout);
+
+  options.signal = controller.signal;
+
   try {
-    const response = await axios(options);
+    const response = await fetch(url, options);
+    clearTimeout(timeoutId); // Clear the timeout once response is received
+
     console.log(`API Response Status: ${response.status}`);
-    console.log(`API Response Data: ${JSON.stringify(response.data)}`);
-    
-    if (response.status >= 200 && response.status < 300) {
-      return response.data;
+
+    let responseData;
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      responseData = await response.json();
     } else {
-      throw new Error(`API Error: ${response.status} - ${JSON.stringify(response.data)}`);
+      responseData = await response.text();
+    }
+
+    console.log(`API Response Data: ${JSON.stringify(responseData)}`);
+
+    if (response.ok) { // Status code is in the range 200-299
+      return responseData;
+    } else {
+      throw new Error(`API Error: ${response.status} - ${JSON.stringify(responseData)}`);
     }
 
   } catch (error) {
-    if (error.response) {
-      console.error(`Error calling API at ${apiEndpoint}:`, `Status ${error.response.status} -`, error.response.data);
+    if (error.name === 'AbortError') {
+      console.error(`Error calling API at ${apiEndpoint}: Request timed out after ${timeout / 1000} seconds.`);
     } else {
       console.error(`Error calling API at ${apiEndpoint}:`, error.message);
     }
