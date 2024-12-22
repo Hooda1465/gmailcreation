@@ -382,7 +382,7 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     mobile =`"${countryCode} ${mobile}"`
     console.log(`Entering the mobile number... ${mobile}`);
-    await page.type('#phoneNumberId', mobile),   { delay: 10} );
+    await page.type('#phoneNumberId', mobile,   { delay: 10} );
     
     await sleep(500); // Wait 2 seconds before the next attempt
     // === Step 3: Click the "Next" Button ===
