@@ -210,28 +210,26 @@ async function callTextVerified(method, apiEndpoint, payload = null) {
  * @returns {Promise<string>} The corresponding code if found; otherwise, an empty string.
  * @throws {Error} Throws an error if the fetch fails or the response format is invalid.
  */
-async function readCodeFromSheet(myMobile = '5033028994') {
+async function readCodeFromSheet(myMobile) {
   const url = 'https://docs.google.com/spreadsheets/d/1VKbx18aTcbKwohSEi0yAmlnNu0C4wIl_O8K7o0TPMwY/gviz/tq?tqx=out:json&tq&gid=0';
-  
-  try {
+  let code = ''
+  // try {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Network response was not ok (${response.status})`);
     
     const text = await response.text();
     const jsonMatch = text.match(/setResponse\((.*)\);$/);
     if (!jsonMatch || jsonMatch.length < 2) throw new Error('Invalid JSON response format.');
-    console.log(jsonMatch[1])
     const data = JSON.parse(jsonMatch[1]);
     const targetRow = data.table.rows.find(row => row.c?.[7]?.f === myMobile);
-    console.log(targetRow)
-    let code = targetRow?.c?.[10]?.v || '';
-    if(code==null) code='';    
+    code = targetRow?.c?.[10]?.v || '';
+    if(code === null) code='';    
     console.log(`Mobile: ${myMobile}, Code: ${code}`);
     return code;
-  } catch (error) {
-    console.error('Error fetching or processing data:', error);
-    throw error; // Rethrow if you want to handle it upstream
-  }
+  // } catch (error) {
+  //   console.error('Error fetching or processing data:', error);
+  //   throw error; // Rethrow if you want to handle it upstream
+  // }
 }
 
 // At the top of your createGoogleAccount.js
@@ -380,8 +378,9 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     const mobileInput = await page.$('#phoneNumberId');
     await mobileInput.click({ clickCount: 3}); // Select the entire text field
-    let mobileNumber = String(`${countryCode} ${mobile}`)
-    await mobileInput.type(mobileNumber,{ delay: 50})    
+    let mobileNumber = String(`${countryCode} ${mobile}`);
+    console.log(`Entered Mobile Number is : ${mobileNumber}`
+    await mobileInput.type(mobileNumber,{ delay: 25})    
     await sleep(500); // Wait hald seconds before the next attempt
     
     // === Step 3: Click the "Next" Button ===
