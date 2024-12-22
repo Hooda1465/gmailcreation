@@ -436,14 +436,16 @@ async function createGoogleAccount(body) {
      console.log('Agreed Policy Done'); 
      return 'Google account creation completed successfully!';
     }else{
-      return await page.content();
+      return "code not received within timeout, so closed";
     }
   } catch (error) {
     console.error('An error occurred:', error.message);
   } finally {
     console.log('Closing the browser...');
-    return await page.content()
-    // await browser.close();
+    if (browser) {    
+      await browser.close();
+      browser = null;     
+    }
   }
 }
 
@@ -559,14 +561,13 @@ module.exports = async (req, res) => {
     if (content === 'Google account creation completed successfully!') {
       return res.status(200).json({ status: 'true' });
     } else {
-      return res.status(404).json({ error: outputcontent });
+      return res.status(404).json({ error: content });
     }
   } catch (error) {
     console.error('Scraping failed:', error.message);
     return res.status(500).json({
       error: 'Internal Server Error',
-      details: error.message,
-      content: outputcontent
+      details: error.message
     });
   } finally {
     // Optionally close the browser if not reusing
