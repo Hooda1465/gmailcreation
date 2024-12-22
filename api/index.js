@@ -16,7 +16,7 @@ let outputcontent='';
  * @returns {Promise} A promise that resolves after the specified time.
  */
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const currentDateTime = new Date(now.getTime() - 1000); // 5,000 milliseconds
+const currentDateTime = new Date(Date.now() - 5000);
 const smsDateTime = datetimeStr => {
   const [date, time] = datetimeStr.split('.');
   const milliseconds = time.slice(0, 3);
