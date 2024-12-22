@@ -203,6 +203,36 @@ async function callTextVerified(method, apiEndpoint, payload = null) {
   }
 }
 
+/**
+ * Retrieves the code associated with a specific mobile number from a Google Sheets document.
+ *
+ * @param {string} [myMobile='5033028994'] - The mobile number to search for.
+ * @returns {Promise<string>} The corresponding code if found; otherwise, an empty string.
+ * @throws {Error} Throws an error if the fetch fails or the response format is invalid.
+ */
+async function readCodeFromSheet(myMobile = '5033028994') {
+  const url = 'https://docs.google.com/spreadsheets/d/1VKbx18aTcbKwohSEi0yAmlnNu0C4wIl_O8K7o0TPMwY/gviz/tq?tqx=out:json&tq&gid=0';
+  
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Network response was not ok (${response.status})`);
+    
+    const text = await response.text();
+    const jsonMatch = text.match(/setResponse\((.*)\);$/);
+    if (!jsonMatch || jsonMatch.length < 2) throw new Error('Invalid JSON response format.');
+    
+    const data = JSON.parse(jsonMatch[1]);
+    const targetRow = data.table.rows.find(row => row.c?.[7]?.f === myMobile);
+    const code = targetRow?.c?.[10]?.v || '';
+    
+    console.log(`Mobile: ${myMobile}, Code: ${code}`);
+    return code;
+  } catch (error) {
+    console.error('Error fetching or processing data:', error);
+    throw error; // Rethrow if you want to handle it upstream
+  }
+}
+
 // At the top of your createGoogleAccount.js
 let browser = null;
 
@@ -241,9 +271,9 @@ async function getBrowser() {
  */
 
 async function createGoogleAccount(body) {
-  const { firstName, lastName, username, password, gender, dob, mobile, apiKey, email} = body;
+  const { firstName, lastName, username, password, gender, dob, mobile, apiKey, email, countryCode} = body;
   const [ year, month, day] = dob.split('-');
-  console.log(firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email)
+  console.log(firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email, countryCode)
   console.log('Launching Puppeteer with Chromium...');
   try {
     console.log('Navigating to the signup page...');
@@ -350,7 +380,7 @@ async function createGoogleAccount(body) {
     outputcontent = await page.content();
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log('Entering the mobile number...');
-    await page.type('#phoneNumberId', '+1 ' + mobile,   { delay: 10} );
+    await page.type('#phoneNumberId', `${countryCode} ${mobile}`,   { delay: 10} );
     
     await sleep(500); // Wait 2 seconds before the next attempt
     // === Step 3: Click the "Next" Button ===
@@ -497,7 +527,7 @@ async function waitForVerificationCode(mobile, apiKey, email) {
 
   for (let i = 0; i < 6; i++) {
     console.log(`Attempt ${i + 1}: Checking for SMS...`);
-    verificationCode = fetchSMS(mobile, apiKey, email);
+    verificationCode = readCodeFromSheet(mobile) // fetchSMS(mobile, apiKey, email);
     if (verificationCode) break;
     console.log('Verification code not received yet. Retrying in 10 seconds...');
     await sleep(5000); // Wait for 10 seconds
