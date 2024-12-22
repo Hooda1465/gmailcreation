@@ -473,7 +473,7 @@ module.exports = async (req, res) => {
   }
 }
 
-// // Server Start
-// app.listen(port, () => {
-//   console.log(`'Server is running on http://localhost:${port}`);
-// });
+// Server Start
+app.listen(port, () => {
+  console.log(`'Server is running on http://localhost:${port}`);
+});
