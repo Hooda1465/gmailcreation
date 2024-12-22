@@ -167,36 +167,6 @@ async function callTextVerified(method, apiEndpoint, payload = null) {
   }
 }
 
-// At the top of your createGoogleAccount.js
-let browser = null;
-
-/**
- * Initializes and returns a Puppeteer browser instance.
- * Reuses the existing instance if available.
- * @returns {Promise<puppeteer.Browser>}
- */
-async function getBrowser() {
-  if (!browser) {
-    console.log('Launching Puppeteer with Chromium...');
-    browser = await puppeteer.launch({
-      args: [
-        ...chromium.args,
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-      ],
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
-      headless: true,
-    });
-    console.log('Browser launched.');
-  }
-  return browser;
-}
-
-
-
 /**
  *  Function to create Google account
  * @param {
@@ -211,28 +181,30 @@ async function createGoogleAccount(body) {
   console.log('Launching Puppeteer with Chromium...');
   try {
     console.log('Navigating to the signup page...');
-    const browserInstance = await getBrowser();
-    const page = await browserInstance.newPage();
-
-    // Block unnecessary resources to speed up page loading
-    await page.setRequestInterception(true);
-    page.on('request', (req) => {
-      const resourceType = req.resourceType();
-      if (['image', 'stylesheet', 'font'].includes(resourceType)) {
-        req.abort();
-      } else {
-        req.continue();
-      }
+    const browser = await puppeteer.launch({
+      args: [
+        ...chromium.args,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+      ],
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+      // headless: false,
     });
   
+    const url = 'https://accounts.google.com/signup'
+  
+    const page = await browser.newPage();
+    console.log('Navigating to URL:', url);
   
     // Set a user agent to avoid bot detection
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
     );
   
-    const url = 'https://accounts.google.com/signup'
-    console.log('Navigating to URL:', url);
     // Navigate to the URL
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
@@ -476,9 +448,6 @@ async function waitForVerificationCode(mobile, apiKey, email) {
  */
 module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(204).end();
   }
 
@@ -487,6 +456,7 @@ module.exports = async (req, res) => {
   }
 
   try {
+    console.log('Starting gmail creations');    
     const content = await createGoogleAccount(req.body);
     if (content === 'Google account creation completed successfully!') {
       return res.status(200).json({ status: 'true' });
@@ -499,43 +469,10 @@ module.exports = async (req, res) => {
       error: 'Internal Server Error',
       details: error.message,
     });
-  } finally {
-    // Optionally close the browser if not reusing
-    if (browser) {
-      await browser.close();
-      browser = null;
-    }
   }
-};
+}
 
-// module.exports = async (req, res) => {
-  
-//   if (req.method === 'OPTIONS') {
-//     return res.status(204).end();
-//   }
-
-//   if (req.method !== 'POST') {
-//     return res.status(405).json({ error: 'Method Not Allowed' });
-//   }
-
-//   try {
-//     console.log('Starting gmail creations');    
-//     const content = await createGoogleAccount(req.body);
-//     if(content =='Google account creation completed successfully!'){
-//       return res.status(200).json({ status:'true' });
-//     }else{
-//       return res.stutus(404).json({error: content})
-//     }    
-//   } catch (error) {
-//     console.error('Scraping failed:', error.message);
-//     return res.status(500).json({
-//       error: 'Internal Server Error',
-//       details: error.message,
-//     });
-//   }
-// }
-
-// Server Start
-app.listen(port, () => {
-  console.log(`'Server is running on http://localhost:${port}`);
-});
+// // Server Start
+// app.listen(port, () => {
+//   console.log(`'Server is running on http://localhost:${port}`);
+// });
