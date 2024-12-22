@@ -206,7 +206,7 @@ async function createGoogleAccount(body) {
     );
   
     // Navigate to the URL
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 120000 });
 
     console.log('Filling in the first and last names...');
     await page.waitForSelector('input[name="firstName"]');
@@ -226,14 +226,14 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('#month', { delay: 50 });
     await page.select('#month', month);
     
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    await sleep(1000); // Wait 2 seconds before the next attempt
     
     await page.waitForSelector('input[name="day"]',  { visible: true });    
-    await page.type('input[name="day"]', day, { delay: 50 }); 
+    await page.type('input[name="day"]', day, { delay: 25 }); 
     
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    await sleep(1000); // Wait 2 seconds before the next attempt
    
-    await page.waitForSelector('#year', { delay: 50 });
+    await page.waitForSelector('#year', { delay: 25 });
     await page.type('#year', year);
     
     await sleep(1000); // Wait 1 seconds before the next attempt
