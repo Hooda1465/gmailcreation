@@ -220,9 +220,10 @@ async function readCodeFromSheet(myMobile = '5033028994') {
     const text = await response.text();
     const jsonMatch = text.match(/setResponse\((.*)\);$/);
     if (!jsonMatch || jsonMatch.length < 2) throw new Error('Invalid JSON response format.');
-    
+    console.log(jsonMatch[1])
     const data = JSON.parse(jsonMatch[1]);
     const targetRow = data.table.rows.find(row => row.c?.[7]?.f === myMobile);
+    console.log(targetRow)
     const code = targetRow?.c?.[10]?.v || '';
     
     console.log(`Mobile: ${myMobile}, Code: ${code}`);
@@ -380,7 +381,7 @@ async function createGoogleAccount(body) {
     outputcontent = await page.content();
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log('Entering the mobile number...');
-    await page.type('#phoneNumberId', `${countryCode} ${mobile}`,   { delay: 10} );
+    await page.type('#phoneNumberId', String(`${countryCode} ${mobile}`),   { delay: 10} );
     
     await sleep(500); // Wait 2 seconds before the next attempt
     // === Step 3: Click the "Next" Button ===
