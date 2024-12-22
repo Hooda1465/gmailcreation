@@ -403,7 +403,7 @@ async function createGoogleAccount(body) {
     await sleep(500); // Wait 2 seconds before the next attempt
     console.log('Waiting for Google to send the verification code...');
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
-    if(verificationCode){
+    if(verificationCode && verificationCode!=null){
      console.log('Entering the verification code...');
      await page.waitForSelector('#code',  { visible: true });
      await page.type('input[id="code"]', verificationCode);
@@ -527,7 +527,7 @@ async function waitForVerificationCode(mobile, apiKey, email) {
 
   for (let i = 0; i < 6; i++) {
     console.log(`Attempt ${i + 1}: Checking for SMS...`);
-    verificationCode = readCodeFromSheet(mobile) // fetchSMS(mobile, apiKey, email);
+    verificationCode = await readCodeFromSheet(mobile) // fetchSMS(mobile, apiKey, email);
     if (verificationCode && verificationCode!=null) break;
     console.log('Verification code not received yet. Retrying in 10 seconds...');
     await sleep(5000); // Wait for 10 seconds
