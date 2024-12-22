@@ -6,7 +6,7 @@ const chromium = require('@sparticuz/chromium');
 const app = express();
 app.use(bodyParser.json());
 
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 // Global variable to store the API token
 let apiToken = '';
@@ -206,7 +206,7 @@ async function createGoogleAccount(body) {
     );
   
     // Navigate to the URL
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 120000 });
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
     console.log('Filling in the first and last names...');
     await page.waitForSelector('input[name="firstName"]');
@@ -473,7 +473,7 @@ module.exports = async (req, res) => {
   }
 }
 
-// Server Start
-app.listen(port, () => {
-  console.log(`'Server is running on http://localhost:${port}`);
-});
+// // Server Start
+// app.listen(port, () => {
+//   console.log(`'Server is running on http://localhost:${port}`);
+// });
