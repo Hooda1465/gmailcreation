@@ -1,10 +1,22 @@
 {
-  "functions": {
-    "index.js": {
-      "maxDuration": 60
-    },
-    "src/*.js": {
-      "maxDuration": 60
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 60
+      }
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/createGoogleAccount",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.js"
+    }
+  ]
 }
