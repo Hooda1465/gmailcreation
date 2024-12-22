@@ -252,22 +252,22 @@ async function createGoogleAccount(body) {
 
     console.log('Filling in birth date and gender...');
     await page.waitForSelector('#month', { delay: 50 });
-    await page.select('#month', month);
+    await page.select('#month',String(month));
     
     await sleep(1000); // Wait 2 seconds before the next attempt
     
     await page.waitForSelector('input[name="day"]',  { visible: true });    
-    await page.type('input[name="day"]', day, { delay: 25 }); 
+    await page.type('input[name="day"]', String(day), { delay: 25 }); 
     
     await sleep(1000); // Wait 2 seconds before the next attempt
    
     await page.waitForSelector('#year', { delay: 25 });
-    await page.type('#year', year);
+    await page.type('#year', String(year));
     
     await sleep(1000); // Wait 1 seconds before the next attempt
 
     await page.waitForSelector('#gender', { delay: 50 });
-    await page.select('#gender', gender); // male    
+    await page.select('#gender', String(gender)); // male    
     
     await sleep(2000); // Wait 2 seconds before the next attempt
 
