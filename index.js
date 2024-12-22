@@ -176,6 +176,7 @@ async function callTextVerified(method, apiEndpoint, payload = null) {
 
 async function createGoogleAccount(body) {
   const { firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email} = body;
+  console.log(firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email)
   console.log('Launching Puppeteer with Chromium...');
   try {
     console.log('Navigating to the signup page...');
@@ -190,6 +191,7 @@ async function createGoogleAccount(body) {
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
       headless: chromium.headless,
+      // headless: false,
     });
   
     const url = 'https://accounts.google.com/signup'
@@ -468,7 +470,7 @@ module.exports = async (req, res) => {
       details: error.message,
     });
   }
-};
+}
 
 // Server Start
 app.listen(port, () => {
