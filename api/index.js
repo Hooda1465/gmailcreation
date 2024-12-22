@@ -53,7 +53,7 @@ async function fetchSMS(mobile, apiKey, email) {
         for (const sms of response.data) {
           if (sms.smsContent) {
             const message = sms.smsContent;
-            cosnt msgDtTime = smsDateTime(sms.createdAt)
+            const msgDtTime = smsDateTime(sms.createdAt)
             console.log(`Received SMS: ${message}`);
             if (message.includes('Google verification') && msgDtTime > currentDateTime) {
               // Extract the first sequence of digits from the message
