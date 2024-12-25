@@ -6,21 +6,31 @@ const chromium = require('@sparticuz/chromium');
 const app = express();
 app.use(bodyParser.json());
 
-const port = process.env.PORT || 3000;
-
+const port = process.env.PORT || 3001;
 // Global variable to store the API token
 let apiToken = '';
+let outputcontent='';
 /**
  * Sleeps for the specified number of milliseconds.
  * @param {number} ms - Milliseconds to sleep.
  * @returns {Promise} A promise that resolves after the specified time.
  */
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const currentDateTime = new Date(Date.now() - 5000);
+const smsDateTime = datetimeStr => {
+  const [date, time] = datetimeStr.split('.');
+  const milliseconds = time.slice(0, 3);
+  const timezoneMatch = time.match(/([+-]\d{2}:\d{2})$/);
+  const timezone = timezoneMatch ? timezoneMatch[1] : 'Z';
+  return `${date}.${milliseconds}${timezone}`;
+};
 
 /**
  * Fetches SMS containing a Google verification code for the specified mobile number.
  * 
  * @param {string} mobile - The mobile number to fetch SMS for.
+ * @param {string} apiKey - The API key for authentication.
+ * @param {string} email - The email associated with the API key.
  * @returns {Promise<string>} The extracted verification code.
  * @throws Will throw an error if fetching SMS fails.
  */
@@ -43,17 +53,15 @@ async function fetchSMS(mobile, apiKey, email) {
         for (const sms of response.data) {
           if (sms.smsContent) {
             const message = sms.smsContent;
+            const msgDtTime = new Date(sms.createdAt).getTime();
             console.log(`Received SMS: ${message}`);
-
-            if (message.includes('Google verification ')) {
+            console.log(msgDtTime, currentDateTime, msgDtTime > currentDateTime)
+            if (message.includes('Google verification') && msgDtTime > currentDateTime) {
               // Extract the first sequence of digits from the message
-              const match = message.match(/Google verification (\d+)/);
-              if (match && match[1]) {
-                code = match[1];
-                console.log(`SMS Content Found: ${code}`);
-                smsContentFound = true;
-                break; // Exit the loop if content is found
-              }
+              code = message.replace(/.*?(\d+).*/, '$1')
+              console.log(`SMS Content Found: ${code}`);
+              smsContentFound = true;
+              break; // Exit the loop if content is found
             }
           }
         }
@@ -78,34 +86,46 @@ async function fetchSMS(mobile, apiKey, email) {
 /**
  * Obtains an authentication token from the TextVerified API.
  * 
+ * @param {string} apiKey - The API key for authentication.
+ * @param {string} email - The email associated with the API key.
  * @returns {Promise<boolean>} True if token is successfully obtained, else false.
  */
 async function getToken(apiKey, email) {
   const url = 'https://www.textverified.com/api/pub/v2/auth';
+  
   const headers = {
     'Accept': 'application/json',
     'X-API-KEY': apiKey,
     'X-API-USERNAME': email,
+    'Content-Type': 'application/json', // Ensure Content-Type is set
   };
 
   try {
-    const response = await axios.post(url, {}, { headers });
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({}), // Sending an empty JSON body
+      timeout: 30000, // Note: Native fetch doesn't support timeout directly
+    });
 
-    if (response.status === 200 && response.data && response.data.token) {
-      apiToken = response.data.token;
+    if (!response.ok) { // response.ok is true for status in the range 200-299
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Failed to obtain API token. Response:', errorData);
+      return false;
+    }
+
+    const data = await response.json();
+    if (data && data.token) {
+      apiToken = data.token;
       console.log('Successfully obtained API token.');
       return true;
     } else {
-      console.error('Failed to obtain API token. Response:', response.data);
+      console.error('Failed to obtain API token. Response:', data);
       return false;
     }
 
   } catch (error) {
-    if (error.response) {
-      console.error(`API responded with status ${error.response.status}:`, error.response.data);
-    } else {
-      console.error('Error while calling API:', error.message);
-    }
+    console.error('Error while calling API:', error.message);
     return false;
   }
 }
@@ -121,45 +141,61 @@ async function getToken(apiKey, email) {
  */
 async function callTextVerified(method, apiEndpoint, payload = null) {
   const baseUrl = 'https://www.textverified.com';
-  const url = apiEndpoint.startsWith(baseUrl) ? apiEndpoint : `${baseUrl}${apiEndpoint}`;
+  const url = apiEndpoint.startsWith('http') ? apiEndpoint : `${baseUrl}${apiEndpoint}`;
   
   const headers = {
     'Accept': 'application/json',
     'Authorization': `Bearer ${apiToken}`,
   };
 
+  // Initialize fetch options
   const options = {
     method: method.toUpperCase(),
-    url,
-    headers,
-    // Timeout after 30 seconds
-    timeout: 30000,
-    validateStatus: function (status) {
-      // Resolve only if the status code is less than 500
-      return status < 500;
-    }
+    headers: headers,
+    // Note: fetch does not support timeout directly. To implement timeout, you'd need to use AbortController.
   };
 
   // Add payload and Content-Type header if applicable
   if (payload && ['POST', 'PUT', 'PATCH'].includes(options.method)) {
-    options.data = payload;
+    options.body = JSON.stringify(payload);
     headers['Content-Type'] = 'application/json';
   }
 
+  // Implementing timeout using AbortController
+  const controller = new AbortController();
+  const timeout = 30000; // 30 seconds
+
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, timeout);
+
+  options.signal = controller.signal;
+
   try {
-    const response = await axios(options);
+    const response = await fetch(url, options);
+    clearTimeout(timeoutId); // Clear the timeout once response is received
+
     console.log(`API Response Status: ${response.status}`);
-    console.log(`API Response Data: ${JSON.stringify(response.data)}`);
-    
-    if (response.status >= 200 && response.status < 300) {
-      return response.data;
+
+    let responseData;
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      responseData = await response.json();
     } else {
-      throw new Error(`API Error: ${response.status} - ${JSON.stringify(response.data)}`);
+      responseData = await response.text();
+    }
+
+    console.log(`API Response Data: ${JSON.stringify(responseData)}`);
+
+    if (response.ok) { // Status code is in the range 200-299
+      return responseData;
+    } else {
+      throw new Error(`API Error: ${response.status} - ${JSON.stringify(responseData)}`);
     }
 
   } catch (error) {
-    if (error.response) {
-      console.error(`Error calling API at ${apiEndpoint}:`, `Status ${error.response.status} -`, error.response.data);
+    if (error.name === 'AbortError') {
+      console.error(`Error calling API at ${apiEndpoint}: Request timed out after ${timeout / 1000} seconds.`);
     } else {
       console.error(`Error calling API at ${apiEndpoint}:`, error.message);
     }
@@ -168,20 +204,46 @@ async function callTextVerified(method, apiEndpoint, payload = null) {
 }
 
 /**
- *  Function to create Google account
- * @param {
- * } body 
- * return status :200 or error
+ * Retrieves the code associated with a specific mobile number from a Google Sheets document.
+ *
+ * @param {string} [myMobile='5033028994'] - The mobile number to search for.
+ * @returns {Promise<string>} The corresponding code if found; otherwise, an empty string.
+ * @throws {Error} Throws an error if the fetch fails or the response format is invalid.
  */
+async function readCodeFromSheet(myMobile) {
+  const url = 'https://docs.google.com/spreadsheets/d/1VKbx18aTcbKwohSEi0yAmlnNu0C4wIl_O8K7o0TPMwY/gviz/tq?tqx=out:json&tq&gid=0';
+  let code = ''
+  // try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Network response was not ok (${response.status})`);
+    
+    const text = await response.text();
+    const jsonMatch = text.match(/setResponse\((.*)\);$/);
+    if (!jsonMatch || jsonMatch.length < 2) throw new Error('Invalid JSON response format.');
+    const data = JSON.parse(jsonMatch[1]);
+    const targetRow = data.table.rows.find(row => row.c?.[7]?.f === myMobile);
+    code = targetRow?.c?.[10]?.v || '';
+    if(code === null) code='';    
+    console.log(`Mobile: ${myMobile}, Code: ${code}`);
+    return code;
+  // } catch (error) {
+  //   console.error('Error fetching or processing data:', error);
+  //   throw error; // Rethrow if you want to handle it upstream
+  // }
+}
 
-async function createGoogleAccount(body) {
-  const { firstName, lastName, username, password, gender, dob, mobile, apiKey, email} = body;
-  const [ year, month, day] = dob.split('-');
-  console.log(firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email)
-  console.log('Launching Puppeteer with Chromium...');
-  try {
-    console.log('Navigating to the signup page...');
-    const browser = await puppeteer.launch({
+// At the top of your createGoogleAccount.js
+let browser = null;
+
+/**
+ * Initializes and returns a Puppeteer browser instance.
+ * Reuses the existing instance if available.
+ * @returns {Promise<puppeteer.Browser>}
+ */
+async function getBrowser() {
+  if (!browser) {
+    console.log('Launching Puppeteer with Chromium...');
+    browser = await puppeteer.launch({
       args: [
         ...chromium.args,
         '--no-sandbox',
@@ -191,29 +253,61 @@ async function createGoogleAccount(body) {
       ],
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
-      // headless: false,
+      headless: true,
+    });
+    console.log('Browser launched.');
+  }
+  return browser;
+}
+
+
+
+/**
+ *  Function to create Google account
+ * @param {
+ * } body 
+ * return status :200 or error
+ */
+
+async function createGoogleAccount(body) {
+  const { firstName, lastName, username, password, gender, dob, mobile, apiKey, email, countryCode} = body;
+  const [ year, month, day] = dob.split('-');
+  console.log(firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email, countryCode)
+  console.log('Launching Puppeteer with Chromium...');
+  try {
+    const mobileNumber = `${countryCode} ${mobile}`
+    console.log('Navigating to the signup page...');
+    const browserInstance = await getBrowser();
+    const page = await browserInstance.newPage();
+
+    // Block unnecessary resources to speed up page loading
+    await page.setRequestInterception(true);
+    page.on('request', (req) => {
+      const resourceType = req.resourceType();
+      if (['image', 'stylesheet', 'font'].includes(resourceType)) {
+        req.abort();
+      } else {
+        req.continue();
+      }
     });
   
-    const url = 'https://accounts.google.com/signup'
-  
-    const page = await browser.newPage();
-    console.log('Navigating to URL:', url);
   
     // Set a user agent to avoid bot detection
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
     );
   
+    const url = 'https://accounts.google.com/signup'
+    console.log('Navigating to URL:', url);
     // Navigate to the URL
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 120000 });
 
     console.log('Filling in the first and last names...');
     await page.waitForSelector('input[name="firstName"]');
-    await page.type('input[name="firstName"]', firstName, { delay: 50 });
+    await page.type('input[name="firstName"]', firstName, { delay: 10 });
     await sleep(2000); // Wait 2 seconds before the next attempt
     await page.waitForSelector('input[name="lastName"]');
-    await page.type('input[name="lastName"]', lastName, { delay: 50 });
+    await page.type('input[name="lastName"]', lastName, { delay: 10 });
 
     console.log('Clicking the "Next" button...');
     await page.waitForSelector('#collectNameNext');
@@ -223,25 +317,25 @@ async function createGoogleAccount(body) {
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
     console.log('Filling in birth date and gender...');
-    await page.waitForSelector('#month', { delay: 50 });
-    await page.select('#month', month);
+    await page.waitForSelector('#month', { delay: 10 });
+    await page.select('#month',String(month));
     
-    await sleep(1000); // Wait 2 seconds before the next attempt
+    await sleep(500); // Wait 2 seconds before the next attempt
     
     await page.waitForSelector('input[name="day"]',  { visible: true });    
-    await page.type('input[name="day"]', day, { delay: 25 }); 
+    await page.type('input[name="day"]', String(day), { delay: 10 }); 
     
-    await sleep(1000); // Wait 2 seconds before the next attempt
+    await sleep(500); // Wait 2 seconds before the next attempt
    
-    await page.waitForSelector('#year', { delay: 25 });
-    await page.type('#year', year);
+    await page.waitForSelector('#year', { delay: 10 });
+    await page.type('#year', String(year));
     
-    await sleep(1000); // Wait 1 seconds before the next attempt
+    await sleep(500); // Wait 1 seconds before the next attempt
 
-    await page.waitForSelector('#gender', { delay: 50 });
-    await page.select('#gender', gender); // male    
+    await page.waitForSelector('#gender', { delay: 10 });
+    await page.select('#gender', String(gender)); // male    
     
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    await sleep(500); // Wait 2 seconds before the next attempt
 
     await page.waitForSelector('#birthdaygenderNext');
     await page.click('#birthdaygenderNext');
@@ -256,8 +350,8 @@ async function createGoogleAccount(body) {
     }
     console.log('Waiting for the Username page...');
     await page.waitForSelector('input[name="Username"]', { visible: true });
-    await page.type('input[name="Username"]', username, { delay: 50 });  
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    await page.type('input[name="Username"]', username, { delay: 10 });  
+    await sleep(1000); // Wait hald seconds before the next attempt
     console.log('Clicking the "Next" button...');
     await page.click('#next');
 
@@ -265,33 +359,32 @@ async function createGoogleAccount(body) {
     console.log('Setting up the password...');
 
     await page.waitForSelector('input[name="Passwd"]',  { visible: true });    
-    await new Promise(resolve => setTimeout(resolve, 3000)); // 1 second
+    await sleep(3000);; // 1 second
     await page.waitForSelector('input[name="PasswdAgain"]',  { visible: true });
     console.log('Entering the password...');
 
     const passInput = await page.$('input[name="Passwd"]');
     await passInput.click({ clickCount: 3}); // Select the entire text field
-    await passInput.type(password,{ delay: 50})
+    await passInput.type(password,{ delay: 30})
     
     // await page.type('input[name="Passwd"]', password);
     await page.type('input[name="PasswdAgain"]', password);
     console.log('Password entered click submit button.......');
     await page.waitForSelector('#createpasswordNext');
     await page.click('#createpasswordNext');    
-   //  return { "message": "Half Code working Properly"}
-    await page.waitForNavigation({ waitUntil: 'networkidle2' });        
     
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
-    console.log('Entering the mobile number...');
-    await page.type('#phoneNumberId', mobile,   { delay: 50} );
-    
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    console.log(`Entering the mobile number... : ${mobileNumber}`);
+    await page.type('#phoneNumberId', String(mobileNumber),   { delay: 50} );    
+    await sleep(2000); // 1 second
     // === Step 3: Click the "Next" Button ===
     // Method 1: Using a stable attribute (e.g., data-primary-action-label)
     const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
     // Wait for the "Next" button to be clickable
-    await page.waitForSelector(nextButtonSelector, { state: 'visible', timeout: 10000 });
+    await page.waitForSelector(nextButtonSelector, { state: 'visible', timeout: 3000 });
     // Scroll the "Next" button into view to ensure it's interactable
     await page.evaluate((selector) => {
       const button = document.querySelector(selector);
@@ -303,18 +396,17 @@ async function createGoogleAccount(body) {
     await page.click(nextButtonSelector);
 
     console.log('Next button clicked!');
-
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    
+    await sleep(2000);; // 1 second
     console.log('Waiting for Google to send the verification code...');
+
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
-    if(verificationCode){
-     //  const verificationCode = "112211"
+    if(verificationCode && verificationCode!=null){
      console.log('Entering the verification code...');
-     
      await page.waitForSelector('#code',  { visible: true });
      await page.type('input[id="code"]', verificationCode);
  
-     await sleep(2000); // Wait 2 seconds before the next attempt
+     await sleep(500); // Wait 2 seconds before the next attempt
  
      await page.waitForSelector('#next');
      await page.click('#next');
@@ -323,31 +415,35 @@ async function createGoogleAccount(body) {
      
      await page.waitForSelector('#recoverySkip');
  
-     await sleep(2000);
+     await sleep(500);
      await page.click('#recoverySkip');
      
+     console.log('Recovery Skipped');
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
  
-     await page.waitForSelector('div[data-primary-action-label="Next"] button');
-     
-     await new Promise(resolve => setTimeout(resolve, 2000)); // 2 seconds
+     await page.waitForSelector('div[data-primary-action-label="Next"] button');     
+     console.log('Recovery Skipped');
+     await sleep(500); 
      await page.click('div[data-primary-action-label="Next"] button');
- 
+     
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
      await page.waitForSelector('div [data-primary-action-label="I agree"] button');
-     
-     await new Promise(resolve => setTimeout(resolve, 1000)); // 2 seconds
+     console.log('Wating for agreement Policy');
+     await sleep(500); 
      await page.click('div [data-primary-action-label="I agree"] button');
- 
+     console.log('Agreed Policy Done'); 
      return 'Google account creation completed successfully!';
     }else{
-      return 'Verification code failed';
+      return "code not received within timeout, so closed";
     }
   } catch (error) {
     console.error('An error occurred:', error.message);
   } finally {
     console.log('Closing the browser...');
-    await browser.close();
+    if (browser) {    
+      await browser.close();
+      browser = null;     
+    }
   }
 }
 
@@ -356,7 +452,7 @@ async function selectCreateYourOwnGmailAddress(page) {
          
   try {
     console.log('Waiting for Gmail address selection options...');
-    await page.waitForSelector('div[role="radiogroup"]', { timeout: 20000 });
+    await page.waitForSelector('div[role="radiogroup"]', { timeout: 5000 });
     const radio = await page.$('div[role="radiogroup"]');
     console.log(radio)
     if(radio!=null){
@@ -402,7 +498,7 @@ async function selectCreateYourOwnGmailAddress(page) {
   
           // Optional: Wait for some feedback after the click, e.g., for the username field to appear
           console.log('Waiting for the username field to appear...');
-          await page.waitForSelector('input[name="Username"]', { visible: true, timeout: 50000 });
+          await page.waitForSelector('input[name="Username"]', { visible: true, timeout: 5000 });
           
           console.log('Username field is now visible.');
           return true;
@@ -411,10 +507,10 @@ async function selectCreateYourOwnGmailAddress(page) {
       }
    }
    else{
-      await page.waitForSelector('input[name="Username"]', { visible: true, timeout: 10000 });
+      await page.waitForSelector('input[name="Username"]', { visible: true, timeout: 5000 });
    }
   } catch (error) {
-    await page.waitForSelector('input[name="Username"]', { visible: true, timeout: 10000 });
+    await page.waitForSelector('input[name="Username"]', { visible: true, timeout: 5000 });
     console.error('Error selecting "Create your own Gmail address":', error.message);
   //    return false;
   }
@@ -426,15 +522,15 @@ async function selectCreateYourOwnGmailAddress(page) {
  * return: verificationCode
  * */
 async function waitForVerificationCode(mobile, apiKey, email) {
-  console.log(`Fetching verification code for mobile number: ${mobileNumber}`);
+  console.log(`Fetching verification code for mobile number: ${mobile}`);
   let verificationCode = '';
 
   for (let i = 0; i < 6; i++) {
     console.log(`Attempt ${i + 1}: Checking for SMS...`);
-    verificationCode = fetchSMS(mobile, apiKey, email);
-    if (verificationCode) break;
+    verificationCode = await readCodeFromSheet(mobile) // fetchSMS(mobile, apiKey, email);
+    if (verificationCode && verificationCode!=null) break;
     console.log('Verification code not received yet. Retrying in 10 seconds...');
-    await sleep(10000); // Wait for 10 seconds
+    await sleep(5000); // Wait for 10 seconds
   }
   // if (!verificationCode) throw new Error('Failed to retrieve verification code.');
   return verificationCode;
@@ -448,6 +544,9 @@ async function waitForVerificationCode(mobile, apiKey, email) {
  */
 module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(204).end();
   }
 
@@ -456,7 +555,6 @@ module.exports = async (req, res) => {
   }
 
   try {
-    console.log('Starting gmail creations');    
     const content = await createGoogleAccount(req.body);
     if (content === 'Google account creation completed successfully!') {
       return res.status(200).json({ status: 'true' });
@@ -467,12 +565,18 @@ module.exports = async (req, res) => {
     console.error('Scraping failed:', error.message);
     return res.status(500).json({
       error: 'Internal Server Error',
-      details: error.message,
+      details: error.message
     });
+  } finally {
+    // Optionally close the browser if not reusing
+    if (browser) {
+      await browser.close();
+      browser = null;
+    }
   }
-}
+};
 
-// // Server Start
-// app.listen(port, () => {
-//   console.log(`'Server is running on http://localhost:${port}`);
-// });
+// Server Start
+app.listen(port, () => {
+  console.log(`'Server is running on http://localhost:${port}`);
+});
