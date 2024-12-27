@@ -374,10 +374,11 @@ async function createGoogleAccount(body) {
     await page.click('#createpasswordNext');    
     
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
-    const oneTimeMobile ="+917838218777"
+    const oneTimeMobile ="7838218777"
     // await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`);
+    await sleep(1000); // 1 second
     await page.type('#phoneNumberId', oneTimeMobile,{ delay: 50})
     // const phoneInput = await page.$('#phoneNumberId');
     // await phoneInput.click({ clickCount: 3}); // Select the entire text field
