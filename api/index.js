@@ -374,18 +374,20 @@ async function createGoogleAccount(body) {
     await page.click('#createpasswordNext');    
     
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
-    
-    await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
+    const oneTimeMobile ="+917838218777"
+    // await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`);
-    const phoneInput = await page.$('#phoneNumberId');
-    await phoneInput.click({ clickCount: 3}); // Select the entire text field
-    await phoneInput.type("+91 7838218777",{ delay: 30})
+    await page.type('#phoneNumberId', oneTimeMobile,{ delay: 50})
+    // const phoneInput = await page.$('#phoneNumberId');
+    // await phoneInput.click({ clickCount: 3}); // Select the entire text field
+    // await phoneInput.type("+91 7838218777",{ delay: 30})
        
     await sleep(2000); // 1 second
     // === Step 3: Click the "Next" Button ===
     // Method 1: Using a stable attribute (e.g., data-primary-action-label)
     const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
+     await sleep(2000); // 1 second
     // Wait for the "Next" button to be clickable
     await page.waitForSelector(nextButtonSelector);
     // Scroll the "Next" button into view to ensure it's interactable
