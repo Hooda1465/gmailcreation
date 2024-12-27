@@ -375,11 +375,11 @@ async function createGoogleAccount(body) {
     
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
     
-    await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`);
-    await page.type('#phoneNumberId', "+91 7838218777",   { delay: 50} );    
-    await sleep(2000); // 1 second
+    await page.type('#phoneNumberId', "+917838218777",   { delay: 20} );    
+    await sleep(1000); // 1 second
     // === Step 3: Click the "Next" Button ===
     // Method 1: Using a stable attribute (e.g., data-primary-action-label)
     const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
