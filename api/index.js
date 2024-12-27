@@ -400,7 +400,7 @@ async function createGoogleAccount(body) {
     await sleep(1000);; // 1 second
     console.log('Waiting for Google to send the verification code...');
     
-    return await.page.content()
+    return await page.content()
 
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
     if(verificationCode && verificationCode!=null){
