@@ -388,7 +388,13 @@ async function createGoogleAccount(body) {
   await sleep(3000); // 1 second
 
 await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
-await page.click('[data-primary-action-label="Next"] button');
+const button = await page.$('[data-primary-action-label="Next"] button');
+if (button) {
+  console.log("Button found");
+} else {
+  console.error("Button not found");
+}
+// await page.click('[data-primary-action-label="Next"] button');
 
 
     
@@ -417,45 +423,47 @@ await page.click('[data-primary-action-label="Next"] button');
     
     await sleep(2000);; // 1 second
     console.log('Waiting for Google to send the verification code...');
-    
+    await page.waitForSelector('#code',  { visible: true });
+     console.log('Code Selector found...');
+    await page.type('input[id="code"]', 112211);
   
 
-    const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
-    if(verificationCode && verificationCode!=null){
-     console.log('Entering the verification code...');
-     await page.waitForSelector('#code',  { visible: true });
-     await page.type('input[id="code"]', verificationCode);
+    // const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
+    // if(verificationCode && verificationCode!=null){
+    //  console.log('Entering the verification code...');
+    //  await page.waitForSelector('#code',  { visible: true });
+    //  await page.type('input[id="code"]', verificationCode);
  
-     await sleep(500); // Wait 2 seconds before the next attempt
+    //  await sleep(500); // Wait 2 seconds before the next attempt
  
-     await page.waitForSelector('#next');
-     await page.click('#next');
+    //  await page.waitForSelector('#next');
+    //  await page.click('#next');
  
-     console.log('Next Code button clicked!');
+    //  console.log('Next Code button clicked!');
      
-     await page.waitForSelector('#recoverySkip');
+    //  await page.waitForSelector('#recoverySkip');
  
-     await sleep(500);
-     await page.click('#recoverySkip');
+    //  await sleep(500);
+    //  await page.click('#recoverySkip');
      
-     console.log('Recovery Skipped');
-     await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    //  console.log('Recovery Skipped');
+    //  await page.waitForNavigation({ waitUntil: 'networkidle2' });
  
-     await page.waitForSelector('div[data-primary-action-label="Next"] button');     
-     console.log('Recovery Skipped');
-     await sleep(500); 
-     await page.click('div[data-primary-action-label="Next"] button');
+    //  await page.waitForSelector('div[data-primary-action-label="Next"] button');     
+    //  console.log('Recovery Skipped');
+    //  await sleep(500); 
+    //  await page.click('div[data-primary-action-label="Next"] button');
      
-     await page.waitForNavigation({ waitUntil: 'networkidle2' });
-     await page.waitForSelector('div [data-primary-action-label="I agree"] button');
-     console.log('Wating for agreement Policy');
-     await sleep(500); 
-     await page.click('div [data-primary-action-label="I agree"] button');
-     console.log('Agreed Policy Done'); 
-     return 'Google account creation completed successfully!';
-    }else{
-      return "code not received within timeout, so closed";
-    }
+    //  await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    //  await page.waitForSelector('div [data-primary-action-label="I agree"] button');
+    //  console.log('Wating for agreement Policy');
+    //  await sleep(500); 
+    //  await page.click('div [data-primary-action-label="I agree"] button');
+    //  console.log('Agreed Policy Done'); 
+    //  return 'Google account creation completed successfully!';
+    // }else{
+    //   return "code not received within timeout, so closed";
+    // }
   } catch (error) {
     console.error('An error occurred:', error.message);
   } finally {
