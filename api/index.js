@@ -398,35 +398,48 @@ if (enteredValue === mobileNumber) {
    
 await page.waitForSelector('[data-is-touch-wrapper="true"] button', { visible: true });
     await sleep(1000); // 1 second
-const buttonDetails = await page.evaluate(() => {
-    const button = document.querySelector('[data-is-touch-wrapper="true"] button');
-    if (button) {
-        return {
-            disabled: button.disabled,
-            text: button.innerText,
-            class: button.className,
-            rect: button.getBoundingClientRect(),
-        };
-    }
-    return null;
-});
-console.log("Button details:", buttonDetails);
-    // Scroll the button into view
+
 await page.evaluate(() => {
     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
     if (button) {
-        button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+        button.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+        button.click();
+        console.log("Forced button click dispatched.");
     }
 });
-await sleep(1000);// Wait to ensure scrolling is complete
+
+
     
-// Click the button
-try {
-    await page.click('[data-is-touch-wrapper="true"] button');
-    console.log("Next button clicked successfully!");
-} catch (error) {
-    console.error("Failed to click the Next button:", error);
-}
+// const buttonDetails = await page.evaluate(() => {
+//     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
+//     if (button) {
+//         return {
+//             disabled: button.disabled,
+//             text: button.innerText,
+//             class: button.className,
+//             rect: button.getBoundingClientRect(),
+//         };
+//     }
+//     return null;
+// });
+// console.log("Button details:", buttonDetails);
+    // Scroll the button into view
+// await page.evaluate(() => {
+//     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
+//     if (button) {
+//         button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+//     }
+// });
+// await sleep(1000);// Wait to ensure scrolling is complete
+    
+// // Click the button
+// try {
+//     await page.click('[data-is-touch-wrapper="true"] button');
+//     console.log("Next button clicked successfully!");
+// } catch (error) {
+//     console.error("Failed to click the Next button:", error);
+// }
 
 
 console.log("Next button clicked! Checking if button is disabled...");
