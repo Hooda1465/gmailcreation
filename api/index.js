@@ -378,13 +378,13 @@ async function createGoogleAccount(body) {
     await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`);
-    await page.type('#phoneNumberId', "+917838218777",   { delay: 50} );    
+    await page.type('#phoneNumberId', "+91 7838218777",   { delay: 50} );    
     await sleep(2000); // 1 second
     // === Step 3: Click the "Next" Button ===
     // Method 1: Using a stable attribute (e.g., data-primary-action-label)
     const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
     // Wait for the "Next" button to be clickable
-    await page.waitForSelector(nextButtonSelector, { state: 'visible', timeout: 3000 });
+    await page.waitForSelector(nextButtonSelector);
     // Scroll the "Next" button into view to ensure it's interactable
     await page.evaluate((selector) => {
       const button = document.querySelector(selector);
@@ -397,8 +397,10 @@ async function createGoogleAccount(body) {
 
     console.log('Next button clicked!');
     
-    await sleep(2000);; // 1 second
+    await sleep(1000);; // 1 second
     console.log('Waiting for Google to send the verification code...');
+    
+    return await.page.content()
 
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
     if(verificationCode && verificationCode!=null){
