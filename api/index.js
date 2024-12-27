@@ -384,7 +384,8 @@ async function createGoogleAccount(body) {
     // await page.type('#phoneNumberId', oneTimeMobile,{ delay: 10 })
     const phoneInput = await page.$('#phoneNumberId');
     await phoneInput.click({ clickCount: 3}); // Select the entire text field
-    await phoneInput.type(oneTimeMobile,{ delay: 30})
+    await sleep(1000); // 1 second
+    await phoneInput.type(oneTimeMobile)
   await sleep(3000); // 1 second
 
 await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
