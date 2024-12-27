@@ -406,7 +406,7 @@ await page.evaluate(() => {
         button.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 });
-await page.waitForTimeout(1000); // Wait to ensure scrolling is complete
+await sleep(1000);// Wait to ensure scrolling is complete
     
 // Click the button
 try {
