@@ -381,8 +381,9 @@ async function createGoogleAccount(body) {
     console.log(`Entering the mobile number... : ${mobileNumber}`);
       await sleep(1000);; // 1 second
     await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
-   
-  await page.type('#phoneNumberId', mobileNumber, { delay: 10 });  
+   await page.focus('#phoneNumberId');
+await page.type('#phoneNumberId', mobileNumber, { delay: 10 });
+  
     // const phoneInput = await page.$('#phoneNumberId');
     // await phoneInput.click({ clickCount: 3}); // Select the entire text field
     // await sleep(1000); // 1 second
