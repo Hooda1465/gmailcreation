@@ -359,7 +359,7 @@ async function createGoogleAccount(body) {
     console.log('Setting up the password...');
 
     await page.waitForSelector('input[name="Passwd"]',  { visible: true });    
-    await sleep(1000);; // 1 second
+    await sleep(3000);; // 1 second
     await page.waitForSelector('input[name="PasswdAgain"]',  { visible: true });
     console.log('Entering the password...');
 
