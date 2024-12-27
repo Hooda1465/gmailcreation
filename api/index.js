@@ -380,16 +380,30 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`);
       await sleep(1000);; // 1 second
-    await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
-   await page.focus('#phoneNumberId');
-await page.type('#phoneNumberId', mobileNumber, { delay: 10 });
+//     await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
+//    await page.focus('#phoneNumberId');
+// await page.type('#phoneNumberId', mobileNumber, { delay: 10 });
   
-    // const phoneInput = await page.$('#phoneNumberId');
-    // await phoneInput.click({ clickCount: 3}); // Select the entire text field
-    // await sleep(1000); // 1 second
-    // await phoneInput.type(mobileNumber)
-    await sleep(2000); // 1 second
+//     // const phoneInput = await page.$('#phoneNumberId');
+//     // await phoneInput.click({ clickCount: 3}); // Select the entire text field
+//     // await sleep(1000); // 1 second
+//     // await phoneInput.type(mobileNumber)
+//     await sleep(2000); // 1 second
 
+
+await page.evaluate((selector, value) => {
+    const input = document.querySelector(selector);
+    if (input) {
+        input.value = value;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        console.log("Mobile number set using JavaScript!");
+    } else {
+        console.error("Input field not found!");
+    }
+}, '#phoneNumberId', mobileNumber);
+
+
+    
 
 // const button = await page.$('[data-primary-action-label="Next"] button');
 // if (button) {
