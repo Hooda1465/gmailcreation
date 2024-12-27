@@ -381,7 +381,17 @@ async function createGoogleAccount(body) {
     console.log(`Entering the mobile number... : ${mobileNumber}`)
     await page.type('#phoneNumberId', mobileNumber, { delay: 50 });
 
+    await sleep(3000);
+const enteredValue = await page.evaluate(() => {
+    const input = document.querySelector('#phoneNumberId');
+    return input ? input.value : null;
+});
 
+if (enteredValue === mobileNumber) {
+    console.log("Mobile number successfully entered:", enteredValue);
+} else {
+    console.error("Mobile number not entered properly. Found value:", enteredValue);
+}
 await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
     await sleep(1000); // 1 second
 await page.click('[data-primary-action-label="Next"] button');
