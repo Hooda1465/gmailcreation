@@ -376,43 +376,14 @@ async function createGoogleAccount(body) {
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
     
   
-    // await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
-    console.log(`Entering the mobile number... : ${mobileNumber}`);
-      await sleep(1000);; // 1 second
-//     await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
-//    await page.focus('#phoneNumberId');
-// await page.type('#phoneNumberId', mobileNumber, { delay: 10 });
-  
-//     // const phoneInput = await page.$('#phoneNumberId');
-//     // await phoneInput.click({ clickCount: 3}); // Select the entire text field
-//     // await sleep(1000); // 1 second
-//     // await phoneInput.type(mobileNumber)
-//     await sleep(2000); // 1 second
+    console.log(`Entering the mobile number... : ${mobileNumber}`)
+    await page.type('#phoneNumberId', mobileNumber, { delay: 50 });
 
 
-await page.evaluate((selector, value) => {
-    const input = document.querySelector(selector);
-    if (input) {
-        input.value = value;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        console.log("Mobile number set using JavaScript!");
-    } else {
-        console.error("Input field not found!");
-    }
-}, '#phoneNumberId', mobileNumber);
-
-
-    
-
-// const button = await page.$('[data-primary-action-label="Next"] button');
-// if (button) {
-//   console.log("Button found");
-//   // await button.click();
-
-// } else {
-//   console.error("Button not found");
-// }
+await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
+    await sleep(1000); // 1 second
 await page.click('[data-primary-action-label="Next"] button');
 console.log("next Button clicked!");
 
@@ -434,8 +405,6 @@ console.log("next Button clicked!");
    
 
     console.log('Next button clicked!');
-
-await page.on('console', (msg) => console.log("PAGE LOG:", msg.text()));
 
 
   await page.waitForNavigation({ waitUntil: 'networkidle2' });
