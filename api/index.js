@@ -396,16 +396,27 @@ if (enteredValue === mobileNumber) {
 
 
    
-await page.waitForSelector('[data-is-touch-wrapper="true"] button', { visible: true });
-    await sleep(1000); // 1 second
+// await page.waitForSelector('[data-is-touch-wrapper="true"] button', { visible: true });
+//     await sleep(1000); // 1 second
 
+// await page.evaluate(() => {
+//     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
+//     if (button) {
+//         button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+//         button.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+//         button.click();
+//         console.log("Forced button click dispatched.");
+//     }
+// });
 await page.evaluate(() => {
     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
     if (button) {
+        button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+        button.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true }));
         button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
         button.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
         button.click();
-        console.log("Forced button click dispatched.");
+        console.log("Forced click dispatched.");
     }
 });
 
