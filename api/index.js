@@ -396,12 +396,12 @@ if (enteredValue === mobileNumber) {
 
 
    
-await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
+await page.waitForSelector('[data-is-touch-wrapper="true"] button', { visible: true });
     await sleep(1000); // 1 second
 
     // Scroll the button into view
 await page.evaluate(() => {
-    const button = document.querySelector('[data-primary-action-label="Next"] button');
+    const button = document.querySelector('[data-is-touch-wrapper="true"] button');
     if (button) {
         button.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -410,7 +410,7 @@ await sleep(1000);// Wait to ensure scrolling is complete
     
 // Click the button
 try {
-    await page.click('[data-primary-action-label="Next"] button');
+    await page.click('[data-is-touch-wrapper="true"] button');
     console.log("Next button clicked successfully!");
 } catch (error) {
     console.error("Failed to click the Next button:", error);
@@ -420,7 +420,7 @@ try {
 console.log("Next button clicked! Checking if button is disabled...");
 
 const isDisabled = await page.evaluate(() => {
-    const button = document.querySelector('[data-primary-action-label="Next"] button');
+    const button = document.querySelector('[data-is-touch-wrapper="true"] button');
     return button ? button.disabled : null;
 });
 
