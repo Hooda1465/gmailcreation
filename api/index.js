@@ -395,8 +395,24 @@ if (enteredValue === mobileNumber) {
 await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
     await sleep(1000); // 1 second
 await page.click('[data-primary-action-label="Next"] button');
+
+console.log("Next button clicked! Checking if button is disabled...");
+
+const isDisabled = await page.evaluate(() => {
+    const button = document.querySelector('[data-primary-action-label="Next"] button');
+    return button ? button.disabled : null;
+});
+
+if (isDisabled) {
+    console.log("Button is now disabled. Click was successful.");
+} else {
+    console.error("Button is still enabled. Click might have failed.");
+}
+
+    
 console.log("next Button clicked!");
 
+    
     
     // const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
     // // Wait for the "Next" button to be clickable
