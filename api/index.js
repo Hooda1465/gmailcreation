@@ -420,7 +420,7 @@ console.log("next Button clicked!");
 
     console.log('Next button clicked!');
 
-
+await page.on('console', (msg) => console.log("PAGE LOG:", msg.text()));
 
 
   await page.waitForNavigation({ waitUntil: 'networkidle2' });
