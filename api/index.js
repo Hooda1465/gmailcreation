@@ -392,9 +392,30 @@ if (enteredValue === mobileNumber) {
 } else {
     console.error("Mobile number not entered properly. Found value:", enteredValue);
 }
+
+
+
+   
 await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
     await sleep(1000); // 1 second
-await page.click('[data-primary-action-label="Next"] button');
+
+    // Scroll the button into view
+await page.evaluate(() => {
+    const button = document.querySelector('[data-primary-action-label="Next"] button');
+    if (button) {
+        button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+await page.waitForTimeout(1000); // Wait to ensure scrolling is complete
+    
+// Click the button
+try {
+    await page.click('[data-primary-action-label="Next"] button');
+    console.log("Next button clicked successfully!");
+} catch (error) {
+    console.error("Failed to click the Next button:", error);
+}
+
 
 console.log("Next button clicked! Checking if button is disabled...");
 
