@@ -391,6 +391,8 @@ await page.waitForSelector('[data-primary-action-label="Next"] button', { visibl
 const button = await page.$('[data-primary-action-label="Next"] button');
 if (button) {
   console.log("Button found");
+  await button.click();
+console.log("Button clicked!");
 } else {
   console.error("Button not found");
 }
