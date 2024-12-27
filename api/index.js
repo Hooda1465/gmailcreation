@@ -381,23 +381,25 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`);
    
-    await page.type('#phoneNumberId', oneTimeMobile)
+    await page.type('#phoneNumberId', oneTimeMobile,{ delay: 10 })
     // const phoneInput = await page.$('#phoneNumberId');
     // await phoneInput.click({ clickCount: 3}); // Select the entire text field
     // await phoneInput.type("+91 7838218777",{ delay: 30})
        
-    const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
-    // Wait for the "Next" button to be clickable
-    await page.waitForSelector(nextButtonSelector, { state: 'visible', timeout: 10000 });
-    // Scroll the "Next" button into view to ensure it's interactable
-    await page.evaluate((selector) => {
-      const button = document.querySelector(selector);
-      if (button) {
-        button.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, nextButtonSelector);
-    // Click the "Next" button
-    await page.click(nextButtonSelector);
+    // const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
+    // // Wait for the "Next" button to be clickable
+    // await page.waitForSelector(nextButtonSelector, { state: 'visible', timeout: 10000 });
+    // // Scroll the "Next" button into view to ensure it's interactable
+    // await page.evaluate((selector) => {
+    //   const button = document.querySelector(selector);
+    //   if (button) {
+    //     button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    //   }
+    // }, nextButtonSelector);
+    // // Click the "Next" button
+
+    await page.waitForSelector('div[data-primary-action-label="Next"] button',  { visible: true }); 
+    await page.click('div[data-primary-action-label="Next"] button');
 
     console.log('Next button clicked!');
 
