@@ -382,24 +382,24 @@ async function createGoogleAccount(body) {
       await sleep(1000);; // 1 second
     await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
    
-    await page.type('#phoneNumberId', mobileNumber)
-    // const phoneInput = await page.$('#phoneNumberId');
-    // await phoneInput.click({ clickCount: 3}); // Select the entire text field
-    // await sleep(1000); // 1 second
-    // await phoneInput.type(oneTimeMobile)
+  
+    const phoneInput = await page.$('#phoneNumberId');
+    await phoneInput.click({ clickCount: 3}); // Select the entire text field
+    await sleep(1000); // 1 second
+    await phoneInput.type(mobileNumber)
   await sleep(3000); // 1 second
 
 
-const button = await page.$('[data-primary-action-label="Next"] button');
-if (button) {
-  console.log("Button found");
-  // await button.click();
+// const button = await page.$('[data-primary-action-label="Next"] button');
+// if (button) {
+//   console.log("Button found");
+//   // await button.click();
 
-} else {
-  console.error("Button not found");
-}
+// } else {
+//   console.error("Button not found");
+// }
 await page.click('[data-primary-action-label="Next"] button');
-console.log("Button clicked!");
+console.log("next Button clicked!");
 
     
     // const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
@@ -423,7 +423,7 @@ console.log("Button clicked!");
 
 
 
- 
+  await page.waitForNavigation({ waitUntil: 'networkidle2' });
     
     await sleep(2000);; // 1 second
     console.log('Waiting for Google to send the verification code...');
