@@ -386,19 +386,25 @@ async function createGoogleAccount(body) {
     await sleep(2000); // 1 second
     // === Step 3: Click the "Next" Button ===
     // Method 1: Using a stable attribute (e.g., data-primary-action-label)
-    const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
-     await sleep(2000); // 1 second
-    // Wait for the "Next" button to be clickable
-    await page.waitForSelector(nextButtonSelector);
-    // Scroll the "Next" button into view to ensure it's interactable
-    await page.evaluate((selector) => {
-      const button = document.querySelector(selector);
-      if (button) {
-        button.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, nextButtonSelector);
+    // const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
+    //  await sleep(2000); // 1 second
+    // // Wait for the "Next" button to be clickable
+    // await page.waitForSelector(nextButtonSelector);
+    // // Scroll the "Next" button into view to ensure it's interactable
+    // await page.evaluate((selector) => {
+    //   const button = document.querySelector(selector);
+    //   if (button) {
+    //     button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    //   }
+    // }, nextButtonSelector);
     // Click the "Next" button
-    await page.click(nextButtonSelector);
+
+await page.waitForSelector('div[data-primary-action-label="Next"] button');
+     console.log('Next button Found!');
+    await page.click('div[data-primary-action-label="Next"] button'); 
+
+    
+    // await page.click(nextButtonSelector);
 
     console.log('Next button clicked!');
     
