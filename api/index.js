@@ -378,7 +378,10 @@ async function createGoogleAccount(body) {
     await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`);
-    await page.type('#phoneNumberId', "+91 7838218777",   { delay: 50} );    
+    const phoneInput = await page.$('#phoneNumberId');
+    await phoneInput.click({ clickCount: 3}); // Select the entire text field
+    await phoneInput.type("+91 7838218777",{ delay: 30})
+       
     await sleep(2000); // 1 second
     // === Step 3: Click the "Next" Button ===
     // Method 1: Using a stable attribute (e.g., data-primary-action-label)
