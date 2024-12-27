@@ -359,7 +359,7 @@ async function createGoogleAccount(body) {
     console.log('Setting up the password...');
 
     await page.waitForSelector('input[name="Passwd"]',  { visible: true });    
-    await sleep(3000);; // 1 second
+    await sleep(1000);; // 1 second
     await page.waitForSelector('input[name="PasswdAgain"]',  { visible: true });
     console.log('Entering the password...');
 
@@ -375,30 +375,31 @@ async function createGoogleAccount(body) {
     
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
     
-    const oneTimeMobile ='+91 8094345969'
-     await sleep(1000); // 1 second
+  
     // await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`);
+      await sleep(1000);; // 1 second
+    await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
    
-    await page.type('#phoneNumberId', oneTimeMobile,{ delay: 50 })
+    await page.type('#phoneNumberId', mobileNumber)
     // const phoneInput = await page.$('#phoneNumberId');
     // await phoneInput.click({ clickCount: 3}); // Select the entire text field
     // await sleep(1000); // 1 second
     // await phoneInput.type(oneTimeMobile)
   await sleep(3000); // 1 second
 
-await page.waitForSelector('[data-primary-action-label="Next"] button', { visible: true });
+
 const button = await page.$('[data-primary-action-label="Next"] button');
 if (button) {
   console.log("Button found");
-  await button.click();
-console.log("Button clicked!");
+  // await button.click();
+
 } else {
   console.error("Button not found");
 }
-// await page.click('[data-primary-action-label="Next"] button');
-
+await page.click('[data-primary-action-label="Next"] button');
+console.log("Button clicked!");
 
     
     // const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
