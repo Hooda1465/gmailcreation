@@ -398,7 +398,19 @@ if (enteredValue === mobileNumber) {
    
 await page.waitForSelector('[data-is-touch-wrapper="true"] button', { visible: true });
     await sleep(1000); // 1 second
-
+const buttonDetails = await page.evaluate(() => {
+    const button = document.querySelector('[data-is-touch-wrapper="true"] button');
+    if (button) {
+        return {
+            disabled: button.disabled,
+            text: button.innerText,
+            class: button.className,
+            rect: button.getBoundingClientRect(),
+        };
+    }
+    return null;
+});
+console.log("Button details:", buttonDetails);
     // Scroll the button into view
 await page.evaluate(() => {
     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
@@ -429,6 +441,7 @@ if (isDisabled) {
 } else {
     console.error("Button is still enabled. Click might have failed.");
 }
+    
 
     
 console.log("next Button clicked!");
