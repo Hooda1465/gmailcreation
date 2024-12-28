@@ -306,7 +306,7 @@ async function createGoogleAccount(body) {
     console.log('Filling in the first and last names...');
     await page.waitForSelector('input[name="firstName"]');
     await page.type('input[name="firstName"]', firstName, { delay: 10 });
-    // await sleep(1000); // Wait 2 seconds before the next attempt
+    await sleep(1000); // Wait 2 seconds before the next attempt
     await page.waitForSelector('input[name="lastName"]');
     await page.type('input[name="lastName"]', lastName, { delay: 10 });
 
@@ -321,22 +321,22 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('#month', { delay: 10 });
     await page.select('#month',String(month));
     
-    await sleep(500); // Wait 2 seconds before the next attempt
+    await sleep(1000); // Wait 2 seconds before the next attempt
     
     await page.waitForSelector('input[name="day"]',  { visible: true });    
     await page.type('input[name="day"]', String(day), { delay: 10 }); 
     
-    // await sleep(1500); // Wait 2 seconds before the next attempt
+    await sleep(1500); // Wait 2 seconds before the next attempt
    
     await page.waitForSelector('#year', { delay: 10 });
     await page.type('#year', String(year));
     
-    await sleep(500); // Wait 1 seconds before the next attempt
+    await sleep(1000); // Wait 1 seconds before the next attempt
 
     await page.waitForSelector('#gender', { delay: 10 });
     await page.select('#gender', String(gender)); // male    
     
-    await sleep(500); // Wait 2 seconds before the next attempt
+    await sleep(1000); // Wait 2 seconds before the next attempt
 
     await page.waitForSelector('#birthdaygenderNext');
     await page.click('#birthdaygenderNext');
@@ -352,7 +352,7 @@ async function createGoogleAccount(body) {
     console.log('Waiting for the Username page...');
     await page.waitForSelector('input[name="Username"]', { visible: true });
     await page.type('input[name="Username"]', username, { delay: 10 });  
-    await sleep(500); // Wait hald seconds before the next attempt
+    await sleep(1000); // Wait hald seconds before the next attempt
     console.log('Clicking the "Next" button...');
     await page.click('#next');
 
@@ -360,7 +360,7 @@ async function createGoogleAccount(body) {
     console.log('Setting up the password...');
 
     await page.waitForSelector('input[name="Passwd"]',  { visible: true });    
-    await sleep(500);; // 1 second
+    await sleep(1000);; // 1 second
     await page.waitForSelector('input[name="PasswdAgain"]',  { visible: true });
     console.log('Entering the password...');
 
@@ -371,7 +371,7 @@ async function createGoogleAccount(body) {
     // await page.type('input[name="Passwd"]', password);
     await page.type('input[name="PasswdAgain"]', password);
     console.log('Password entered click submit button.......');  
-    await sleep(500);; // 1 second
+    await sleep(1000);; // 1 second
     await page.waitForSelector('#createpasswordNext');
     await page.click('#createpasswordNext');    
     
