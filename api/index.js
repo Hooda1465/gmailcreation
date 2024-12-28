@@ -320,22 +320,22 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('#month', { delay: 10 });
     await page.select('#month',String(month));
     
-    await sleep(1500); // Wait 2 seconds before the next attempt
+    // await sleep(1500); // Wait 2 seconds before the next attempt
     
     await page.waitForSelector('input[name="day"]',  { visible: true });    
     await page.type('input[name="day"]', String(day), { delay: 10 }); 
     
-    await sleep(1500); // Wait 2 seconds before the next attempt
+    // await sleep(1500); // Wait 2 seconds before the next attempt
    
     await page.waitForSelector('#year', { delay: 10 });
     await page.type('#year', String(year));
     
-    await sleep(1500); // Wait 1 seconds before the next attempt
+    // await sleep(1500); // Wait 1 seconds before the next attempt
 
     await page.waitForSelector('#gender', { delay: 10 });
     await page.select('#gender', String(gender)); // male    
     
-    await sleep(500); // Wait 2 seconds before the next attempt
+    // await sleep(500); // Wait 2 seconds before the next attempt
 
     await page.waitForSelector('#birthdaygenderNext');
     await page.click('#birthdaygenderNext');
@@ -351,7 +351,7 @@ async function createGoogleAccount(body) {
     console.log('Waiting for the Username page...');
     await page.waitForSelector('input[name="Username"]', { visible: true });
     await page.type('input[name="Username"]', username, { delay: 10 });  
-    await sleep(1000); // Wait hald seconds before the next attempt
+    // await sleep(1000); // Wait hald seconds before the next attempt
     console.log('Clicking the "Next" button...');
     await page.click('#next');
 
@@ -359,7 +359,7 @@ async function createGoogleAccount(body) {
     console.log('Setting up the password...');
 
     await page.waitForSelector('input[name="Passwd"]',  { visible: true });    
-    await sleep(2000);; // 1 second
+    // await sleep(2000);; // 1 second
     await page.waitForSelector('input[name="PasswdAgain"]',  { visible: true });
     console.log('Entering the password...');
 
@@ -380,7 +380,7 @@ async function createGoogleAccount(body) {
     console.log(`Entering the mobile number... : ${mobileNumber}`)
     await page.type('#phoneNumberId', mobileNumber, { delay: 50 });
 
-    await sleep(2000);
+    // await sleep(2000);
     const enteredValue = await page.evaluate(() => {
         const input = document.querySelector('#phoneNumberId');
         return input ? input.value : null;
@@ -401,7 +401,7 @@ async function createGoogleAccount(body) {
 
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
     
-    await sleep(1000);; // 1 second
+    // await sleep(1000);; // 1 second
     console.log('Waiting for Google to send the verification code...');
     await page.waitForSelector('#code',  { visible: true });
     console.log('Code Selector found...');
@@ -418,7 +418,7 @@ async function createGoogleAccount(body) {
      await page.waitForSelector('#code',  { visible: true });
      await page.type('#code', verificationCode);
  
-     await sleep(500); // Wait 2 seconds before the next attempt
+     // await sleep(500); // Wait 2 seconds before the next attempt
      
     await page.waitForSelector('[data-is-touch-wrapper="true"] button');
     await page.click('[data-is-touch-wrapper="true"] button');  
@@ -426,14 +426,14 @@ async function createGoogleAccount(body) {
            
      await page.waitForNavigation({ waitUntil: 'networkidle2' }); 
      await page.waitForSelector('div[data-primary-action-label="Next"] button');   
-     await sleep(500); 
+     // await sleep(500); 
      await page.click('div[data-primary-action-label="Next"] button');  
      console.log('Recovery Skipped');
      
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
      await page.waitForSelector('div [data-primary-action-label="I agree"] button');
      console.log('Wating for agreement Policy');
-     await sleep(500); 
+     // await sleep(500); 
      await page.click('div [data-primary-action-label="I agree"] button');
      console.log('Agreed Policy Done'); 
      return 'Google account creation completed successfully!';
@@ -534,7 +534,7 @@ async function waitForVerificationCode(mobile, apiKey, email) {
     verificationCode = await fetchSMS(mobile, apiKey, email); // readCodeFromSheet(mobile) // 
     if (verificationCode && verificationCode!=null) break;
     console.log('Verification code not received yet. Retrying in 10 seconds...');
-    await sleep(5000); // Wait for 10 seconds
+    await sleep(1000); // Wait for 10 seconds
   }
   // if (!verificationCode) throw new Error('Failed to retrieve verification code.');
   return verificationCode;
