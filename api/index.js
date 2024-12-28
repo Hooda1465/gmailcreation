@@ -275,7 +275,7 @@ async function createGoogleAccount(body) {
   console.log(firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email, countryCode)
   console.log('Launching Puppeteer with Chromium...');
   try {
-    const mobileNumber = `${countryCode} ${mobile}`
+    const mobileNumber = countryCode+ " " + mobile 
     console.log('Navigating to the signup page...');
     const browserInstance = await getBrowser();
     const page = await browserInstance.newPage();
@@ -395,143 +395,42 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('[data-is-touch-wrapper="true"] button');
     await page.click('[data-is-touch-wrapper="true"] button'); 
     
-    return await page.content();
-    
-   
-// await page.waitForSelector('[data-is-touch-wrapper="true"] button', { visible: true });
-//     await sleep(1000); // 1 second
-
-// await page.evaluate(() => {
-//     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
-//     if (button) {
-//         button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-//         button.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
-//         button.click();
-//         console.log("Forced button click dispatched.");
-//     }
-// });
-// await page.evaluate(() => {
-//     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
-//     if (button) {
-//         button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
-//         button.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true }));
-//         button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-//         button.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
-//         button.click();
-//         console.log("Forced click dispatched.");
-//     }
-// });
-
-
-    
-// const buttonDetails = await page.evaluate(() => {
-//     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
-//     if (button) {
-//         return {
-//             disabled: button.disabled,
-//             text: button.innerText,
-//             class: button.className,
-//             rect: button.getBoundingClientRect(),
-//         };
-//     }
-//     return null;
-// });
-// console.log("Button details:", buttonDetails);
-    // Scroll the button into view
-// await page.evaluate(() => {
-//     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
-//     if (button) {
-//         button.scrollIntoView({ behavior: 'smooth', block: 'center' });
-//     }
-// });
-// await sleep(1000);// Wait to ensure scrolling is complete
-    
-// // Click the button
-// try {
-//     await page.click('[data-is-touch-wrapper="true"] button');
-//     console.log("Next button clicked successfully!");
-// } catch (error) {
-//     console.error("Failed to click the Next button:", error);
-// }
-
-
-// console.log("Next button clicked! Checking if button is disabled...");
-
-// const isDisabled = await page.evaluate(() => {
-//     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
-//     return button ? button.disabled : null;
-// });
-
-// if (isDisabled) {
-//     console.log("Button is now disabled. Click was successful.");
-// } else {
-//     console.error("Button is still enabled. Click might have failed.");
-// }
-        
-  console.log("next Button clicked!");
-   
-    
-    // const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
-    // // Wait for the "Next" button to be clickable
-    //  await sleep(1000); // 1 second
-    // await page.waitForSelector(nextButtonSelector, { state: 'visible', timeout: 10000 });
-    // // Scroll the "Next" button into view to ensure it's interactable
-    // await page.evaluate((selector) => {
-    //   const button = document.querySelector(selector);
-    //   if (button) {
-    //     button.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    //   }
-    // }, nextButtonSelector);
-    //  await page.click(nextButtonSelector);
-    // // Click the "Next" button
-
-    console.log('Next button clicked! waiting for CODE page');
-
-    await page.waitForNavigation({ waitUntil: 'networkidle2' });
-    
-    await sleep(1000);; // 1 second
-    console.log('Waiting for Google to send the verification code...');
-    await page.waitForSelector('#code',  { visible: true });
-     console.log('Code Selector found...');
-    await page.type('input[id="code"]', 112211);
-  
-
-    // const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
-    // if(verificationCode && verificationCode!=null){
-    //  console.log('Entering the verification code...');
-    //  await page.waitForSelector('#code',  { visible: true });
-    //  await page.type('input[id="code"]', verificationCode);
+    const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
+    if(verificationCode && verificationCode!=null){
+     console.log('Entering the verification code...');
+     await page.waitForSelector('#code',  { visible: true });
+     await page.type('#code', String(verificationCode));
  
-    //  await sleep(500); // Wait 2 seconds before the next attempt
+     await sleep(500); // Wait 2 seconds before the next attempt
  
-    //  await page.waitForSelector('#next');
-    //  await page.click('#next');
+      await page.waitForSelector('[data-is-touch-wrapper="true"] button');
+      await page.click('[data-is-touch-wrapper="true"] button'); 
  
-    //  console.log('Next Code button clicked!');
+     console.log('Next Code button clicked!');
      
-    //  await page.waitForSelector('#recoverySkip');
+     await page.waitForSelector('#recoverySkip');
  
-    //  await sleep(500);
-    //  await page.click('#recoverySkip');
+     await sleep(500);
+     await page.click('#recoverySkip');
      
-    //  console.log('Recovery Skipped');
-    //  await page.waitForNavigation({ waitUntil: 'networkidle2' });
+     console.log('Recovery Skipped');
+     await page.waitForNavigation({ waitUntil: 'networkidle2' });
  
-    //  await page.waitForSelector('div[data-primary-action-label="Next"] button');     
-    //  console.log('Recovery Skipped');
-    //  await sleep(500); 
-    //  await page.click('div[data-primary-action-label="Next"] button');
+     await page.waitForSelector('div[data-primary-action-label="Next"] button');     
+     console.log('Recovery Skipped');
+     await sleep(500); 
+     await page.click('div[data-primary-action-label="Next"] button');
      
-    //  await page.waitForNavigation({ waitUntil: 'networkidle2' });
-    //  await page.waitForSelector('div [data-primary-action-label="I agree"] button');
-    //  console.log('Wating for agreement Policy');
-    //  await sleep(500); 
-    //  await page.click('div [data-primary-action-label="I agree"] button');
-    //  console.log('Agreed Policy Done'); 
-    //  return 'Google account creation completed successfully!';
-    // }else{
-    //   return "code not received within timeout, so closed";
-    // }
+     await page.waitForNavigation({ waitUntil: 'networkidle2' });
+     await page.waitForSelector('div [data-primary-action-label="I agree"] button');
+     console.log('Wating for agreement Policy');
+     await sleep(500); 
+     await page.click('div [data-primary-action-label="I agree"] button');
+     console.log('Agreed Policy Done'); 
+     return 'Google account creation completed successfully!';
+    }else{
+      return "code not received within timeout, so closed";
+    }
   } catch (error) {
     console.error('An error occurred:', error.message);
   } finally {
