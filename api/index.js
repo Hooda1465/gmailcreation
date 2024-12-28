@@ -395,6 +395,15 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('[data-is-touch-wrapper="true"] button');
     await page.click('[data-is-touch-wrapper="true"] button'); 
     
+    await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    
+     console.log('Entering the verification code...');
+     await page.waitForSelector('#code',  { visible: true });
+      console.log('Code id found')
+     await page.type('#code', String(verificationCode));
+ 
+     await sleep(500); // Wait 2 seconds before the next attempt
+    
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
     if(verificationCode && verificationCode!=null){
      console.log('Entering the verification code...');
