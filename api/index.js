@@ -414,29 +414,21 @@ async function createGoogleAccount(body) {
 
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
     if(verificationCode && verificationCode!=null){
-     console.log('Entering the verification code...');
+     console.log(`Code ${verificationCode} found and Entering the verification code now`);
      await page.waitForSelector('#code',  { visible: true });
-     await page.type('input[id="code"]', verificationCode);
+     await page.type('#code', verificationCode);
  
      await sleep(500); // Wait 2 seconds before the next attempt
- 
-     await page.waitForSelector('#next');
-     await page.click('#next');
- 
-     console.log('Next Code button clicked!');
      
-     await page.waitForSelector('#recoverySkip');
- 
-     await sleep(500);
-     await page.click('#recoverySkip');
-     
-     console.log('Recovery Skipped');
-     await page.waitForNavigation({ waitUntil: 'networkidle2' });
- 
-     await page.waitForSelector('div[data-primary-action-label="Next"] button');     
-     console.log('Recovery Skipped');
+    await page.waitForSelector('[data-is-touch-wrapper="true"] button');
+    await page.click('[data-is-touch-wrapper="true"] button');  
+     console.log('Next button on Code page clicked!');
+           
+     await page.waitForNavigation({ waitUntil: 'networkidle2' }); 
+     await page.waitForSelector('div[data-primary-action-label="Next"] button');   
      await sleep(500); 
-     await page.click('div[data-primary-action-label="Next"] button');
+     await page.click('div[data-primary-action-label="Next"] button');  
+     console.log('Recovery Skipped');
      
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
      await page.waitForSelector('div [data-primary-action-label="I agree"] button');
