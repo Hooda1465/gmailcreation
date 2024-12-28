@@ -275,7 +275,7 @@ async function createGoogleAccount(body) {
   console.log(firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email, countryCode)
   console.log('Launching Puppeteer with Chromium...');
   try {
-    const mobileNumber = countryCode+ " " + mobile 
+    const mobileNumber = String(countryCode+ " " + mobile).trim()
     console.log('Navigating to the signup page...');
     const browserInstance = await getBrowser();
     const page = await browserInstance.newPage();
