@@ -376,22 +376,25 @@ async function createGoogleAccount(body) {
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
     
   
-    await new Promise(resolve => setTimeout(resolve, 2000)); // 1 second
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`)
     await page.type('#phoneNumberId', mobileNumber, { delay: 50 });
 
-    await sleep(3000);
-const enteredValue = await page.evaluate(() => {
-    const input = document.querySelector('#phoneNumberId');
-    return input ? input.value : null;
-});
-
-if (enteredValue === mobileNumber) {
-    console.log("Mobile number successfully entered:", enteredValue);
-} else {
-    console.error("Mobile number not entered properly. Found value:", enteredValue);
-}
+    await sleep(1000);
+    const enteredValue = await page.evaluate(() => {
+        const input = document.querySelector('#phoneNumberId');
+        return input ? input.value : null;
+    });
+    
+    if (enteredValue === mobileNumber) {
+        console.log("Mobile number successfully entered:", enteredValue);
+    } else {
+        console.error("Mobile number not entered properly. Found value:", enteredValue);
+    }
+    
+    const button = await page.$('[data-is-touch-wrapper="true"] button');
+    await passInput.click();
 
 
 
@@ -408,17 +411,17 @@ if (enteredValue === mobileNumber) {
 //         console.log("Forced button click dispatched.");
 //     }
 // });
-await page.evaluate(() => {
-    const button = document.querySelector('[data-is-touch-wrapper="true"] button');
-    if (button) {
-        button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
-        button.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true }));
-        button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-        button.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
-        button.click();
-        console.log("Forced click dispatched.");
-    }
-});
+// await page.evaluate(() => {
+//     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
+//     if (button) {
+//         button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+//         button.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true }));
+//         button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+//         button.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+//         button.click();
+//         console.log("Forced click dispatched.");
+//     }
+// });
 
 
     
@@ -453,22 +456,22 @@ await page.evaluate(() => {
 // }
 
 
-console.log("Next button clicked! Checking if button is disabled...");
+// console.log("Next button clicked! Checking if button is disabled...");
 
-const isDisabled = await page.evaluate(() => {
-    const button = document.querySelector('[data-is-touch-wrapper="true"] button');
-    return button ? button.disabled : null;
-});
+// const isDisabled = await page.evaluate(() => {
+//     const button = document.querySelector('[data-is-touch-wrapper="true"] button');
+//     return button ? button.disabled : null;
+// });
 
-if (isDisabled) {
-    console.log("Button is now disabled. Click was successful.");
-} else {
-    console.error("Button is still enabled. Click might have failed.");
-}
+// if (isDisabled) {
+//     console.log("Button is now disabled. Click was successful.");
+// } else {
+//     console.error("Button is still enabled. Click might have failed.");
+// }
     
 
     
-console.log("next Button clicked!");
+  console.log("next Button clicked!");
 
     
     
@@ -486,12 +489,9 @@ console.log("next Button clicked!");
     //  await page.click(nextButtonSelector);
     // // Click the "Next" button
 
-   
+    console.log('Next button clicked! waiting for CODE page');
 
-    console.log('Next button clicked!');
-
-
-  await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    await page.waitForNavigation({ waitUntil: 'networkidle2' });
     
     await sleep(2000);; // 1 second
     console.log('Waiting for Google to send the verification code...');
