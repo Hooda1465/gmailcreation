@@ -336,7 +336,7 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('#gender', { delay: 10 });
     await page.select('#gender', String(gender)); // male    
     
-    // await sleep(500); // Wait 2 seconds before the next attempt
+    await sleep(500); // Wait 2 seconds before the next attempt
 
     await page.waitForSelector('#birthdaygenderNext');
     await page.click('#birthdaygenderNext');
@@ -352,7 +352,7 @@ async function createGoogleAccount(body) {
     console.log('Waiting for the Username page...');
     await page.waitForSelector('input[name="Username"]', { visible: true });
     await page.type('input[name="Username"]', username, { delay: 10 });  
-    // await sleep(1000); // Wait hald seconds before the next attempt
+    await sleep(500); // Wait hald seconds before the next attempt
     console.log('Clicking the "Next" button...');
     await page.click('#next');
 
@@ -360,7 +360,7 @@ async function createGoogleAccount(body) {
     console.log('Setting up the password...');
 
     await page.waitForSelector('input[name="Passwd"]',  { visible: true });    
-    // await sleep(2000);; // 1 second
+    await sleep(500);; // 1 second
     await page.waitForSelector('input[name="PasswdAgain"]',  { visible: true });
     console.log('Entering the password...');
 
@@ -370,13 +370,15 @@ async function createGoogleAccount(body) {
     
     // await page.type('input[name="Passwd"]', password);
     await page.type('input[name="PasswdAgain"]', password);
-    console.log('Password entered click submit button.......');
+    console.log('Password entered click submit button.......');  
+    await sleep(500);; // 1 second
     await page.waitForSelector('#createpasswordNext');
     await page.click('#createpasswordNext');    
     
+    await sleep(500);; // 1 second
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
       
-    await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second
+    // await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`)
     await page.type('#phoneNumberId', mobileNumber, { delay: 50 });
