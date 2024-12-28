@@ -321,7 +321,7 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('#month', { delay: 10 });
     await page.select('#month',String(month));
     
-    // await sleep(1500); // Wait 2 seconds before the next attempt
+    await sleep(500); // Wait 2 seconds before the next attempt
     
     await page.waitForSelector('input[name="day"]',  { visible: true });    
     await page.type('input[name="day"]', String(day), { delay: 10 }); 
@@ -331,7 +331,7 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('#year', { delay: 10 });
     await page.type('#year', String(year));
     
-    // await sleep(1500); // Wait 1 seconds before the next attempt
+    await sleep(500); // Wait 1 seconds before the next attempt
 
     await page.waitForSelector('#gender', { delay: 10 });
     await page.select('#gender', String(gender)); // male    
