@@ -391,10 +391,10 @@ async function createGoogleAccount(body) {
     } else {
         console.error("Mobile number not entered properly. Found value:", enteredValue);
     }
-    
-    const button = await page.$('[data-is-touch-wrapper="true"] button');
-    await passInput.click();
 
+    await page.waitForSelector('[data-is-touch-wrapper="true"] button');
+    await page.click('[data-is-touch-wrapper="true"] button'); 
+    
    
 // await page.waitForSelector('[data-is-touch-wrapper="true"] button', { visible: true });
 //     await sleep(1000); // 1 second
