@@ -378,7 +378,7 @@ async function createGoogleAccount(body) {
     await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`)
-    await page.type('#phoneNumberId',"+91 7428838118", { delay: 50 });
+    await page.type('#phoneNumberId',"7428838118", { delay: 50 });
 
     await sleep(1000);
     const enteredValue = await page.evaluate(() => {
