@@ -44,9 +44,10 @@ async function fetchSMS(mobile, apiKey, email) {
   let code = '';
 
   console.log(`Starting to fetch SMS for mobile number: ${mobile}`);
-
+  await sleep(5000); // Wait 5 seconds before the next attempt
   while (!smsContentFound) {
     try {
+      
       const response = await callTextVerified('GET', apiEndpoint);
       
       if (response && response.data && Array.isArray(response.data) && response.data.length > 0) {
@@ -68,8 +69,8 @@ async function fetchSMS(mobile, apiKey, email) {
       }
 
       if (!smsContentFound) {
-        console.log('Verification SMS not found. Waiting for 5 seconds before retrying...');
-        await sleep(5000); // Wait 5 seconds before the next attempt
+        console.log('Verification SMS not found. Waiting for 1 seconds before retrying...');
+        await sleep(1000); // Wait 1 seconds before the next attempt
       }
 
     } catch (error) {
@@ -105,7 +106,7 @@ async function getToken(apiKey, email) {
       method: 'POST',
       headers: headers,
       body: JSON.stringify({}), // Sending an empty JSON body
-      timeout: 30000, // Note: Native fetch doesn't support timeout directly
+      timeout: 60000, // Note: Native fetch doesn't support timeout directly
     });
 
     if (!response.ok) { // response.ok is true for status in the range 200-299
@@ -305,7 +306,7 @@ async function createGoogleAccount(body) {
     console.log('Filling in the first and last names...');
     await page.waitForSelector('input[name="firstName"]');
     await page.type('input[name="firstName"]', firstName, { delay: 10 });
-    await sleep(1000); // Wait 2 seconds before the next attempt
+    // await sleep(1000); // Wait 2 seconds before the next attempt
     await page.waitForSelector('input[name="lastName"]');
     await page.type('input[name="lastName"]', lastName, { delay: 10 });
 
