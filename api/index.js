@@ -395,6 +395,8 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('[data-is-touch-wrapper="true"] button');
     await page.click('[data-is-touch-wrapper="true"] button'); 
     
+    return await page.content();
+    
    
 // await page.waitForSelector('[data-is-touch-wrapper="true"] button', { visible: true });
 //     await sleep(1000); // 1 second
