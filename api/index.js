@@ -305,7 +305,7 @@ async function createGoogleAccount(body) {
     console.log('Filling in the first and last names...');
     await page.waitForSelector('input[name="firstName"]');
     await page.type('input[name="firstName"]', firstName, { delay: 10 });
-    await sleep(2000); // Wait 2 seconds before the next attempt
+    await sleep(1000); // Wait 2 seconds before the next attempt
     await page.waitForSelector('input[name="lastName"]');
     await page.type('input[name="lastName"]', lastName, { delay: 10 });
 
@@ -359,7 +359,7 @@ async function createGoogleAccount(body) {
     console.log('Setting up the password...');
 
     await page.waitForSelector('input[name="Passwd"]',  { visible: true });    
-    await sleep(3000);; // 1 second
+    await sleep(1000);; // 1 second
     await page.waitForSelector('input[name="PasswdAgain"]',  { visible: true });
     console.log('Entering the password...');
 
@@ -374,8 +374,7 @@ async function createGoogleAccount(body) {
     await page.click('#createpasswordNext');    
     
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
-    
-  
+      
     await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`)
@@ -395,8 +394,6 @@ async function createGoogleAccount(body) {
     
     const button = await page.$('[data-is-touch-wrapper="true"] button');
     await passInput.click();
-
-
 
    
 // await page.waitForSelector('[data-is-touch-wrapper="true"] button', { visible: true });
@@ -468,12 +465,9 @@ async function createGoogleAccount(body) {
 // } else {
 //     console.error("Button is still enabled. Click might have failed.");
 // }
-    
-
-    
+        
   console.log("next Button clicked!");
-
-    
+   
     
     // const nextButtonSelector = 'div[data-primary-action-label="Next"] button';
     // // Wait for the "Next" button to be clickable
@@ -493,7 +487,7 @@ async function createGoogleAccount(body) {
 
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
     
-    await sleep(2000);; // 1 second
+    await sleep(1000);; // 1 second
     console.log('Waiting for Google to send the verification code...');
     await page.waitForSelector('#code',  { visible: true });
      console.log('Code Selector found...');
