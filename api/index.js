@@ -321,7 +321,7 @@ async function createGoogleAccount(body) {
     console.log('Filling in the first and last names...');
     await page.waitForSelector('input[name="firstName"]');
     await page.type('input[name="firstName"]', firstName, { delay: 10 });
-    await sleep(650); // Wait 2 seconds before the next attempt
+    await sleep(250); // Wait 2 seconds before the next attempt
     await page.waitForSelector('input[name="lastName"]');
     await page.type('input[name="lastName"]', lastName, { delay: 10 });
 
@@ -336,22 +336,22 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('#month', { delay: 10 });
     await page.select('#month',String(month));
     
-    await sleep(900); // Wait 2 seconds before the next attempt
+    await sleep(200); // Wait 2 seconds before the next attempt
     
     await page.waitForSelector('input[name="day"]',  { visible: true });    
     await page.type('input[name="day"]', String(day), { delay: 10 }); 
     
-    await sleep(700); // Wait 2 seconds before the next attempt
+    await sleep(300); // Wait 2 seconds before the next attempt
    
     await page.waitForSelector('#year', { delay: 10 });
     await page.type('#year', String(year));
     
-    await sleep(800); // Wait 1 seconds before the next attempt
+    await sleep(200); // Wait 1 seconds before the next attempt
 
     await page.waitForSelector('#gender', { delay: 10 });
     await page.select('#gender', String(gender)); // male    
     
-    await sleep(750); // Wait 2 seconds before the next attempt
+    await sleep(250); // Wait 2 seconds before the next attempt
 
     await page.waitForSelector('#birthdaygenderNext');
     await page.click('#birthdaygenderNext');
@@ -367,7 +367,7 @@ async function createGoogleAccount(body) {
     console.log('Waiting for the Username page...');
     await page.waitForSelector('input[name="Username"]', { visible: true });
     await page.type('input[name="Username"]', username, { delay: 10 });  
-    await sleep(500); // Wait hald seconds before the next attempt
+    await sleep(200); // Wait hald seconds before the next attempt
     console.log('Clicking the "Next" button...');
     await page.click('#next');
 
@@ -375,7 +375,7 @@ async function createGoogleAccount(body) {
     console.log('Setting up the password...');
 
     await page.waitForSelector('input[name="Passwd"]',  { visible: true });    
-    await sleep(500);; // 1 second
+    await sleep(200);; // 1 second
     await page.waitForSelector('input[name="PasswdAgain"]',  { visible: true });
     console.log('Entering the password...');
 
@@ -386,18 +386,18 @@ async function createGoogleAccount(body) {
     // await page.type('input[name="Passwd"]', password);
     await page.type('input[name="PasswdAgain"]', password);
     console.log('Password entered click submit button.......');  
-    await sleep(2000);; // 1 second
+    await sleep(200);; // 1 second
     await page.waitForSelector('#createpasswordNext');
     await page.click('#createpasswordNext');    
        
-        await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    await page.waitForNavigation({ waitUntil: 'networkidle2' });
       
-    await sleep(1000);
+    await sleep(200);
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`)
     await page.type('#phoneNumberId', mobileNumber, { delay: 50 });
 
-    await sleep(2000);
+    await sleep(200);
     const enteredValue = await page.evaluate(() => {
         const input = document.querySelector('#phoneNumberId');
         return input ? input.value : null;
@@ -433,7 +433,7 @@ async function createGoogleAccount(body) {
     if(verificationCode && verificationCode!=null){
      console.log(`Code ${verificationCode} found and Entering the verification code now`);
      await page.waitForSelector('#code',  { visible: true });
-     await page.type('#code', verificationCode);
+     await page.type('#code', String(verificationCode));
  
      // await sleep(500); // Wait 2 seconds before the next attempt
      
@@ -443,14 +443,14 @@ async function createGoogleAccount(body) {
            
      await page.waitForNavigation({ waitUntil: 'networkidle2' }); 
      await page.waitForSelector('div[data-primary-action-label="Next"] button');   
-     // await sleep(500); 
+     await sleep(200); 
      await page.click('div[data-primary-action-label="Next"] button');  
      console.log('Recovery Skipped');
      
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
      await page.waitForSelector('div [data-primary-action-label="I agree"] button');
      console.log('Wating for agreement Policy');
-     // await sleep(500); 
+     await sleep(200); 
      await page.click('div [data-primary-action-label="I agree"] button');
      console.log('Agreed Policy Done'); 
       // close proxy chain
