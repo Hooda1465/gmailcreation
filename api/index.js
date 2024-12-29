@@ -435,7 +435,7 @@ async function createGoogleAccount(body) {
      console.log(`Code ${verificationCode} found and Entering the verification code now`);
       
      await codeInput.click({ clickCount: 2}); // Select the entire text field
-     await codeInput.type(String(verificationCode) ,{ delay: 5} 
+     await codeInput.type(String(verificationCode) ,{ delay: 5} )
      await sleep(200); // Wait 2 seconds before the next attempt
        
      await page.waitForSelector('[data-is-touch-wrapper="true"] button');
