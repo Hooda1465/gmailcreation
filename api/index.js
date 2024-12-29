@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');    
 const puppeteer = require('puppeteer');
 const chromium = require('@sparticuz/chromium');
-const proxyChain = require('proxy-chain');
+// const proxyChain = require('proxy-chain');
 
 const app = express();
 app.use(bodyParser.json());
