@@ -420,7 +420,7 @@ async function createGoogleAccount(body) {
     
     // await sleep(1000);; // 1 second
     console.log('Waiting for Google to send the verification code...');
-    const codeInput = await page.$('#code');)
+    const codeInput = await page.$('#code');
     
     // const codeInput = await page.waitForSelector('#code',  { visible: true });
     console.log('Code Selector found...');
