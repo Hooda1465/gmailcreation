@@ -420,9 +420,9 @@ async function createGoogleAccount(body) {
     
     // await sleep(1000);; // 1 second
     console.log('Waiting for Google to send the verification code...');
-    const codeInput = await page.$('#code');
+    // const codeInput = await page.$('#code');
     
-    // const codeInput = await page.waitForSelector('#code',  { visible: true });
+    const codeInput = await page.waitForSelector('#code',  { visible: true });
     console.log('Code Selector found...');
     
     // await sleep(1000);; // 1 second
@@ -433,8 +433,12 @@ async function createGoogleAccount(body) {
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
     if(verificationCode && verificationCode!=null){
      console.log(`Code ${verificationCode} found and Entering the verification code now`);
+     // await page.waitForSelector('#code',  { visible: true });
+      console.log('Code Selector found...');
       
-     await codeInput.type(String(verificationCode) ,{ delay: 5} )
+     await codeInput.click({ clickCount: 3}); // Select the entire text field
+     await codeInput.type('#code', String(verificationCode) ,{ delay: 5} );
+      
      await sleep(200); // Wait 2 seconds before the next attempt
      console.log('CODE ENTERED');
      await page.waitForSelector('[data-is-touch-wrapper="true"] button');
