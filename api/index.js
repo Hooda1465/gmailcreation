@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');    
 const puppeteer = require('puppeteer');
 const chromium = require('@sparticuz/chromium');
+const proxyChain = require('proxy-chain');
 
 const app = express();
 app.use(bodyParser.json());
@@ -244,16 +245,30 @@ let browser = null;
 async function getBrowser() {
   if (!browser) {
     console.log('Launching Puppeteer with Chromium...');
+    // Proxies List from Private proxies
+    const proxiesList = [
+        'http://skrll:au4....',
+        ' http://skrll:au4....',
+        ' http://skrll:au4....',
+        ' http://skrll:au4....',
+        ' http://skrll:au4....',
+     ];
+    
+    const oldProxyUrl = proxiesList[Math.floor(Math.random() * (proxiesList.length))];
+    // const newProxyUrl = await proxyChain.anonymizeProxy(oldProxyUrl);
     browser = await puppeteer.launch({
       args: [
+        // `--proxy-server=${newProxyUrl}`,
         ...chromium.args,
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
+        `--ignore-certificate-errors`,
       ],
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
+      ignoreHTTPSErrors: true,
       headless: true,
     });
     console.log('Browser launched.');
@@ -439,6 +454,8 @@ async function createGoogleAccount(body) {
      // await sleep(500); 
      await page.click('div [data-primary-action-label="I agree"] button');
      console.log('Agreed Policy Done'); 
+      // close proxy chain
+     // await proxyChain.closeAnonymizedProxy(newProxyUrl, true);
      return 'Google account creation completed successfully!';
     }else{
       return "code not received within timeout, so closed";
@@ -448,6 +465,8 @@ async function createGoogleAccount(body) {
   } finally {
     // console.log('Closing the browser...');
     // if (browser) {    
+    // close proxy chain
+    // await proxyChain.closeAnonymizedProxy(newProxyUrl, true);
     //   await browser.close();
     //   browser = null;     
     // }
