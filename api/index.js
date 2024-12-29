@@ -1,4 +1,377 @@
-await page.waitForNavigation({ waitUntil: 'networkidle2' });
+const express = require('express');     
+const bodyParser = require('body-parser');    
+const puppeteer = require('puppeteer');
+const chromium = require('@sparticuz/chromium');
+// const proxyChain = require('proxy-chain');
+
+const app = express();
+app.use(bodyParser.json());
+
+const port = process.env.PORT || 3001;
+// Global variable to store the API token
+let apiToken = '';
+let outputcontent='';
+/**
+ * Sleeps for the specified number of milliseconds.
+ * @param {number} ms - Milliseconds to sleep.
+ * @returns {Promise} A promise that resolves after the specified time.
+ */
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const currentDateTime = new Date(Date.now() - 5000);
+const smsDateTime = datetimeStr => {
+  const [date, time] = datetimeStr.split('.');
+  const milliseconds = time.slice(0, 3);
+  const timezoneMatch = time.match(/([+-]\d{2}:\d{2})$/);
+  const timezone = timezoneMatch ? timezoneMatch[1] : 'Z';
+  return `${date}.${milliseconds}${timezone}`;
+};
+
+/**
+ * Fetches SMS containing a Google verification code for the specified mobile number.
+ * 
+ * @param {string} mobile - The mobile number to fetch SMS for.
+ * @param {string} apiKey - The API key for authentication.
+ * @param {string} email - The email associated with the API key.
+ * @returns {Promise<string>} The extracted verification code.
+ * @throws Will throw an error if fetching SMS fails.
+ */
+async function fetchSMS(mobile, apiKey, email) {
+  if (!await getToken(apiKey, email)) {
+    throw new Error('Failed to obtain API token.');
+  }
+
+  const apiEndpoint = `/api/pub/v2/sms?to=${encodeURIComponent(mobile)}`;
+  let smsContentFound = false;
+  let code = '';
+
+  console.log(`Starting to fetch SMS for mobile number: ${mobile}`);
+  await sleep(5000); // Wait 5 seconds before the next attempt
+  while (!smsContentFound) {
+    try {
+      
+      const response = await callTextVerified('GET', apiEndpoint);
+      
+      if (response && response.data && Array.isArray(response.data) && response.data.length > 0) {
+        for (const sms of response.data) {
+          if (sms.smsContent) {
+            const message = sms.smsContent;
+            const msgDtTime = new Date(sms.createdAt).getTime();
+            console.log(`Received SMS: ${message}`);
+            console.log(msgDtTime, currentDateTime, msgDtTime > currentDateTime)
+            if (message.includes('Google verification') && msgDtTime > currentDateTime) {
+              // Extract the first sequence of digits from the message
+              code = message.replace(/.*?(\d+).*/, '$1')
+              console.log(`SMS Content Found: ${code}`);
+              smsContentFound = true;
+              break; // Exit the loop if content is found
+            }
+          }
+        }
+      }
+
+      if (!smsContentFound) {
+        console.log('Verification SMS not found. Waiting for 1 seconds before retrying...');
+        await sleep(1000); // Wait 1 seconds before the next attempt
+      }
+
+    } catch (error) {
+      console.error('Error while fetching SMS:', error.message);
+      // Depending on requirements, you might want to break the loop or retry
+      throw error;
+    }
+  }
+
+  console.log(`Completed checking SMS. Verification code: ${code}`);
+  return code;
+}
+
+/**
+ * Obtains an authentication token from the TextVerified API.
+ * 
+ * @param {string} apiKey - The API key for authentication.
+ * @param {string} email - The email associated with the API key.
+ * @returns {Promise<boolean>} True if token is successfully obtained, else false.
+ */
+async function getToken(apiKey, email) {
+  const url = 'https://www.textverified.com/api/pub/v2/auth';
+  
+  const headers = {
+    'Accept': 'application/json',
+    'X-API-KEY': apiKey,
+    'X-API-USERNAME': email,
+    'Content-Type': 'application/json', // Ensure Content-Type is set
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({}), // Sending an empty JSON body
+      timeout: 60000, // Note: Native fetch doesn't support timeout directly
+    });
+
+    if (!response.ok) { // response.ok is true for status in the range 200-299
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Failed to obtain API token. Response:', errorData);
+      return false;
+    }
+
+    const data = await response.json();
+    if (data && data.token) {
+      apiToken = data.token;
+      console.log('Successfully obtained API token.');
+      return true;
+    } else {
+      console.error('Failed to obtain API token. Response:', data);
+      return false;
+    }
+
+  } catch (error) {
+    console.error('Error while calling API:', error.message);
+    return false;
+  }
+}
+
+/**
+ * Makes an API call to the TextVerified service.
+ * 
+ * @param {string} method - HTTP method ('GET', 'POST', etc.).
+ * @param {string} apiEndpoint - The API endpoint path (e.g., '/api/pub/v2/sms').
+ * @param {Object} [payload=null] - Optional payload for POST/PUT requests.
+ * @returns {Promise<Object>} The response data from the API.
+ * @throws Will throw an error if the API call fails.
+ */
+async function callTextVerified(method, apiEndpoint, payload = null) {
+  const baseUrl = 'https://www.textverified.com';
+  const url = apiEndpoint.startsWith('http') ? apiEndpoint : `${baseUrl}${apiEndpoint}`;
+  
+  const headers = {
+    'Accept': 'application/json',
+    'Authorization': `Bearer ${apiToken}`,
+  };
+
+  // Initialize fetch options
+  const options = {
+    method: method.toUpperCase(),
+    headers: headers,
+    // Note: fetch does not support timeout directly. To implement timeout, you'd need to use AbortController.
+  };
+
+  // Add payload and Content-Type header if applicable
+  if (payload && ['POST', 'PUT', 'PATCH'].includes(options.method)) {
+    options.body = JSON.stringify(payload);
+    headers['Content-Type'] = 'application/json';
+  }
+
+  // Implementing timeout using AbortController
+  const controller = new AbortController();
+  const timeout = 30000; // 30 seconds
+
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, timeout);
+
+  options.signal = controller.signal;
+
+  try {
+    const response = await fetch(url, options);
+    clearTimeout(timeoutId); // Clear the timeout once response is received
+
+    console.log(`API Response Status: ${response.status}`);
+
+    let responseData;
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      responseData = await response.json();
+    } else {
+      responseData = await response.text();
+    }
+
+    console.log(`API Response Data: ${JSON.stringify(responseData)}`);
+
+    if (response.ok) { // Status code is in the range 200-299
+      return responseData;
+    } else {
+      throw new Error(`API Error: ${response.status} - ${JSON.stringify(responseData)}`);
+    }
+
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      console.error(`Error calling API at ${apiEndpoint}: Request timed out after ${timeout / 1000} seconds.`);
+    } else {
+      console.error(`Error calling API at ${apiEndpoint}:`, error.message);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Retrieves the code associated with a specific mobile number from a Google Sheets document.
+ *
+ * @param {string} [myMobile='5033028994'] - The mobile number to search for.
+ * @returns {Promise<string>} The corresponding code if found; otherwise, an empty string.
+ * @throws {Error} Throws an error if the fetch fails or the response format is invalid.
+ */
+async function readCodeFromSheet(myMobile) {
+  const url = 'https://docs.google.com/spreadsheets/d/1VKbx18aTcbKwohSEi0yAmlnNu0C4wIl_O8K7o0TPMwY/gviz/tq?tqx=out:json&tq&gid=0';
+  let code = ''
+  // try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Network response was not ok (${response.status})`);
+    
+    const text = await response.text();
+    const jsonMatch = text.match(/setResponse\((.*)\);$/);
+    if (!jsonMatch || jsonMatch.length < 2) throw new Error('Invalid JSON response format.');
+    const data = JSON.parse(jsonMatch[1]);
+    const targetRow = data.table.rows.find(row => row.c?.[7]?.f === myMobile);
+    code = targetRow?.c?.[10]?.v || '';
+    if(code === null) code='';    
+    console.log(`Mobile: ${myMobile}, Code: ${code}`);
+    return code;
+  // } catch (error) {
+  //   console.error('Error fetching or processing data:', error);
+  //   throw error; // Rethrow if you want to handle it upstream
+  // }
+}
+
+// At the top of your createGoogleAccount.js
+let browser = null;
+
+/**
+ * Initializes and returns a Puppeteer browser instance.
+ * Reuses the existing instance if available.
+ * @returns {Promise<puppeteer.Browser>}
+ */
+async function getBrowser() {
+  if (!browser) {
+    console.log('Launching Puppeteer with Chromium...');
+    // Proxies List from Private proxies
+    const proxiesList = [
+        'http://skrll:au4....',
+        ' http://skrll:au4....',
+        ' http://skrll:au4....',
+        ' http://skrll:au4....',
+        ' http://skrll:au4....',
+     ];
+    
+    const oldProxyUrl = proxiesList[Math.floor(Math.random() * (proxiesList.length))];
+    // const newProxyUrl = await proxyChain.anonymizeProxy(oldProxyUrl);
+    browser = await puppeteer.launch({
+      args: [
+        // `--proxy-server=${newProxyUrl}`,
+        ...chromium.args,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        `--ignore-certificate-errors`,
+      ],
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      ignoreHTTPSErrors: true,
+      headless: true,
+    });
+    console.log('Browser launched.');
+  }
+  return browser;
+}
+
+
+
+/**
+ *  Function to create Google account
+ * @param {
+ * } body 
+ * return status :200 or error
+ */
+
+async function createGoogleAccount(body) {
+  const { firstName, lastName, username, password, gender, dob, mobile, apiKey, email, countryCode} = body;
+  const [ year, month, day] = dob.split('-');
+  console.log(firstName, lastName, username, password, gender, day, month, year, mobile, apiKey, email, countryCode)
+  console.log('Launching Puppeteer with Chromium...');
+  try {
+    const mobileNumber = String(countryCode+ " " + mobile).trim()
+    console.log('Navigating to the signup page...');
+    const browserInstance = await getBrowser();
+    const page = await browserInstance.newPage();
+
+    // Block unnecessary resources to speed up page loading
+    await page.setRequestInterception(true);
+    page.on('request', (req) => {
+      const resourceType = req.resourceType();
+      if (['image', 'stylesheet', 'font'].includes(resourceType)) {
+        req.abort();
+      } else {
+        req.continue();
+      }
+    });
+  
+  
+    // Set a user agent to avoid bot detection
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+    );
+  
+    const url = 'https://accounts.google.com/signup'
+    console.log('Navigating to URL:', url);
+    // Navigate to the URL
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 180000 });
+
+    console.log('Filling in the first and last names...');
+    await page.waitForSelector('input[name="firstName"]');
+    await page.type('input[name="firstName"]', firstName, { delay: 10 });
+    await sleep(650); // Wait 2 seconds before the next attempt
+    await page.waitForSelector('input[name="lastName"]');
+    await page.type('input[name="lastName"]', lastName, { delay: 10 });
+
+    console.log('Clicking the "Next" button...');
+    await page.waitForSelector('#collectNameNext');
+    await page.click('#collectNameNext');
+
+    console.log('Waiting for the Basic Information page to load...');
+    await page.waitForNavigation({ waitUntil: 'networkidle2' });
+
+    console.log('Filling in birth date and gender...');
+    await page.waitForSelector('#month', { delay: 10 });
+    await page.select('#month',String(month));
+    
+    await sleep(900); // Wait 2 seconds before the next attempt
+    
+    await page.waitForSelector('input[name="day"]',  { visible: true });    
+    await page.type('input[name="day"]', String(day), { delay: 10 }); 
+    
+    await sleep(700); // Wait 2 seconds before the next attempt
+   
+    await page.waitForSelector('#year', { delay: 10 });
+    await page.type('#year', String(year));
+    
+    await sleep(800); // Wait 1 seconds before the next attempt
+
+    await page.waitForSelector('#gender', { delay: 10 });
+    await page.select('#gender', String(gender)); // male    
+    
+    await sleep(750); // Wait 2 seconds before the next attempt
+
+    await page.waitForSelector('#birthdaygenderNext');
+    await page.click('#birthdaygenderNext');
+
+    console.log('button clicked birthdaygenderNext');
+    await page.waitForNavigation({ waitUntil: 'networkidle2' });
+
+    console.log('Handling Gmail address selection...');
+    const optionSelected = await selectCreateYourOwnGmailAddress(page);
+    if (!optionSelected) {
+    //   throw new Error('Failed to select "Create your own Gmail address".');
+    }
+    console.log('Waiting for the Username page...');
+    await page.waitForSelector('input[name="Username"]', { visible: true });
+    await page.type('input[name="Username"]', username, { delay: 10 });  
+    await sleep(500); // Wait hald seconds before the next attempt
+    console.log('Clicking the "Next" button...');
+    await page.click('#next');
+
+    await page.waitForNavigation({ waitUntil: 'networkidle2' });
     console.log('Setting up the password...');
 
     await page.waitForSelector('input[name="Passwd"]',  { visible: true });    
