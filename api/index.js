@@ -17,7 +17,7 @@ let outputcontent='';
  * @returns {Promise} A promise that resolves after the specified time.
  */
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const currentDateTime = new Date(Date.now() - 5000);
+const currentDateTime = new Date(Date.now() - 10000);
 const smsDateTime = datetimeStr => {
   const [date, time] = datetimeStr.split('.');
   const milliseconds = time.slice(0, 3);
@@ -422,8 +422,8 @@ async function createGoogleAccount(body) {
     console.log('Waiting for Google to send the verification code...');
     // const codeInput = await page.$('#code');
     
-    const codeInput = await page.waitForSelector('#code',  { visible: true });
-    console.log('Code Selector found...');
+    // const codeInput = await page.waitForSelector('#code',  { visible: true });
+    // console.log('Code Selector found...');
     
     // await sleep(1000);; // 1 second
     // await page.waitForSelector('[data-is-touch-wrapper="true"] button');
@@ -433,14 +433,19 @@ async function createGoogleAccount(body) {
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
     if(verificationCode && verificationCode!=null){
      console.log(`Code ${verificationCode} found and Entering the verification code now`);
-     // await page.waitForSelector('#code',  { visible: true });
-      console.log('Code Selector found...');
+    await page.waitForSelector('#code',  { visible: true });   
+    console.log('Code Selector found...');
+    const code = await page.$('#code');
+    await code.click({ clickCount: 2}); // Select the entire text field      
+    await sleep(200); 
+    await code.type(verificationCode,{ delay: 30})          
+    await sleep(200); // Wait 2 seconds before the next attempt
       
-     await codeInput.click({ clickCount: 3}); // Select the entire text field
-     await codeInput.type('#code', String(verificationCode) ,{ delay: 5} );
-      
-     await sleep(200); // Wait 2 seconds before the next attempt
-     console.log('CODE ENTERED');
+    //  await page.waitForSelector('#code', { visible: true });
+    //  await page.type('#code', verificationCode, { delay: 60 });        
+    //  await sleep(200); // Wait 2 seconds before the next attempt
+     
+    console.log('CODE ENTERED');
      await page.waitForSelector('[data-is-touch-wrapper="true"] button');
      await page.click('[data-is-touch-wrapper="true"] button');  
      console.log('Next button on Code page clicked!');
@@ -450,24 +455,27 @@ async function createGoogleAccount(body) {
      await sleep(200); 
      await page.click('#recoverySkip');  
      console.log('Recovery Skipped');
-
+     
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
+      
+     await page.waitForSelector('div [data-primary-action-label="Next"] button', { timeout: 3000 });     
+     const nextButton = await page.$('div [data-primary-action-label="Next"] button');      
+
+     if(nextButton){       
+      await page.click('div [data-primary-action-label="Next"] button');  
+      console.log('Next Button Clicked');      
+     await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    }    
+     
      await page.waitForSelector('div [data-primary-action-label="I agree"] button', { timeout: 5000 });
      const iAgree = await page.$('div [data-primary-action-label="I agree"] button');
       
-     await page.waitForSelector('div [data-primary-action-label="Next"] button', { timeout: 5000 });     
-     const nextButton = await page.$('div [data-primary-action-label="Next"] button');
-      
-     if(iAgree && iAgree!=null){       
+     if(iAgree){       
        await page.click('div [data-primary-action-label="I agree"] button');  
        console.log('I Agree Button Clicked');
+       console.log('Agreed Policy Done'); 
      }
 
-     if(nextButton && nextButton!=null){       
-       await page.click('div [data-primary-action-label="Next"] button');  
-       console.log('Next Button Clicked');
-     }
-     console.log('Agreed Policy Done'); 
      return 'Google account creation completed successfully!';
     }else{
       return "code not received within timeout, so closed";
