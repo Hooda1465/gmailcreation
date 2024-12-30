@@ -437,9 +437,9 @@ async function createGoogleAccount(body) {
     console.log('Code Selector found...');
     const code = await page.$('#code');
     await code.click({ clickCount: 2}); // Select the entire text field      
-    await sleep(200); 
+    await sleep(500); 
     await code.type(verificationCode,{ delay: 30})          
-    await sleep(200); // Wait 2 seconds before the next attempt
+    await sleep(500); // Wait 2 seconds before the next attempt
       
     //  await page.waitForSelector('#code', { visible: true });
     //  await page.type('#code', verificationCode, { delay: 60 });        
