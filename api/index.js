@@ -446,19 +446,28 @@ async function createGoogleAccount(body) {
      console.log('Next button on Code page clicked!');
            
      await page.waitForNavigation({ waitUntil: 'networkidle2' }); 
-     await page.waitForSelector('div[data-primary-action-label="Next"] button');   
+     await page.waitForSelector('#recoverySkip');   
      await sleep(200); 
-     await page.click('div[data-primary-action-label="Next"] button');  
+     await page.click('#recoverySkip');  
      console.log('Recovery Skipped');
-     
+
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
-     await page.waitForSelector('div [data-primary-action-label="I agree"] button');
-     console.log('Wating for agreement Policy');
-     await sleep(200); 
-     await page.click('div [data-primary-action-label="I agree"] button');
+     await page.waitForSelector('div [data-primary-action-label="I agree"] button', { timeout: 5000 });
+     const iAgree = await page.$('div [data-primary-action-label="I agree"] button');
+      
+     await page.waitForSelector('div [data-primary-action-label="Next"] button', { timeout: 5000 });     
+     const nextButton = await page.$('div [data-primary-action-label="Next"] button');
+      
+     if(iAgree && iAgree!=null){       
+       await page.click('div [data-primary-action-label="I agree"] button');  
+       console.log('I Agree Button Clicked');
+     }
+
+     if(nextButton && nextButton!=null){       
+       await page.click('div [data-primary-action-label="Next"] button');  
+       console.log('Next Button Clicked');
+     }
      console.log('Agreed Policy Done'); 
-      // close proxy chain
-     // await proxyChain.closeAnonymizedProxy(newProxyUrl, true);
      return 'Google account creation completed successfully!';
     }else{
       return "code not received within timeout, so closed";
