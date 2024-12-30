@@ -306,13 +306,13 @@ async function createGoogleAccount(body) {
         req.continue();
       }
     });
-  
-  
+
+
     // Set a user agent to avoid bot detection
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
     );
-  
+
     const url = 'https://accounts.google.com/signup'
     console.log('Navigating to URL:', url);
     // Navigate to the URL
@@ -335,22 +335,22 @@ async function createGoogleAccount(body) {
     console.log('Filling in birth date and gender...');
     await page.waitForSelector('#month', { delay: 10 });
     await page.select('#month',String(month));
-    
+
     await sleep(200); // Wait 2 seconds before the next attempt
-    
+
     await page.waitForSelector('input[name="day"]',  { visible: true });    
     await page.type('input[name="day"]', String(day), { delay: 10 }); 
-    
+
     await sleep(300); // Wait 2 seconds before the next attempt
-   
+
     await page.waitForSelector('#year', { delay: 10 });
     await page.type('#year', String(year));
-    
+
     await sleep(200); // Wait 1 seconds before the next attempt
 
     await page.waitForSelector('#gender', { delay: 10 });
     await page.select('#gender', String(gender)); // male    
-    
+
     await sleep(250); // Wait 2 seconds before the next attempt
 
     await page.waitForSelector('#birthdaygenderNext');
@@ -382,16 +382,16 @@ async function createGoogleAccount(body) {
     const passInput = await page.$('input[name="Passwd"]');
     await passInput.click({ clickCount: 3}); // Select the entire text field
     await passInput.type(password,{ delay: 30})
-    
+
     // await page.type('input[name="Passwd"]', password);
     await page.type('input[name="PasswdAgain"]', password);
     console.log('Password entered click submit button.......');  
     await sleep(200);; // 1 second
     await page.waitForSelector('#createpasswordNext');
     await page.click('#createpasswordNext');    
-       
+
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
-      
+
     await sleep(200);
     await page.waitForSelector('#phoneNumberId',  { visible: true });
     console.log(`Entering the mobile number... : ${mobileNumber}`)
@@ -402,7 +402,7 @@ async function createGoogleAccount(body) {
         const input = document.querySelector('#phoneNumberId');
         return input ? input.value : null;
     });
-    
+
     if (enteredValue === mobileNumber) {
         console.log("Mobile number successfully entered:", enteredValue);
     } else {
@@ -411,24 +411,24 @@ async function createGoogleAccount(body) {
 
     await page.waitForSelector('[data-is-touch-wrapper="true"] button');
     await page.click('[data-is-touch-wrapper="true"] button'); 
-        
+
     console.log("next Button clicked!");
 
     console.log('Next button clicked! waiting for CODE page');
 
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
-    
+
     // await sleep(1000);; // 1 second
     console.log('Waiting for Google to send the verification code...');
     // const codeInput = await page.$('#code');
-    
-    // const codeInput = await page.waitForSelector('#code',  { visible: true });
-    // console.log('Code Selector found...');
-    
+
+    const codeInput = await page.waitForSelector('#code',  { visible: true });
+    console.log('Code Selector found...');
+
     // await sleep(1000);; // 1 second
     // await page.waitForSelector('[data-is-touch-wrapper="true"] button');
     // await page.click('[data-is-touch-wrapper="true"] button'); 
-  
+
 
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
     if(verificationCode && verificationCode!=null){
@@ -475,7 +475,6 @@ async function createGoogleAccount(body) {
        console.log('I Agree Button Clicked');
        console.log('Agreed Policy Done'); 
      }
-
      return 'Google account creation completed successfully!';
     }else{
       return "code not received within timeout, so closed";
