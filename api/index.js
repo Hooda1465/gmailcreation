@@ -481,21 +481,19 @@ async function createGoogleAccount(body) {
     // Wait for any transitions or animations to complete (if necessary)
     await sleep(500); // Optional delay to ensure transitions complete
     
-    // Ensure the button is interactable before clicking (wait for visibility and interaction)
-    await page.waitForSelector('div[data-primary-action-label="I agree"] button', { visible: true, timeout: 2000 });
-    
-    // Click the "I agree" button with force (in case it's blocked by another element)
-    const iAgreeButton = await page.$('div[data-primary-action-label="I agree"] button');
-    if (iAgreeButton) {
-      await iAgreeButton.click({ force: true }); // Force click to bypass potential obstacles
-      console.log('I Agree Button Clicked');
-      console.log('Agreed Policy Done');
-    } else {
+    const [button] = await page.$x("//button[contains(., 'I agree')]");
+    if (button){
+      // Scroll the button into view before clicking
+      await page.evaluate(button => {
+        button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, button);
+      await button.click();
+    }else{
       console.log('I Agree Button not found!');
     }
-  
+    
     // Optionally, wait for navigation after clicking the button with a shorter timeout
-    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 1000 });
+    await page.waitForNavigation({ waitUntil: 'networkidle2' });
           
      return 'Google account creation completed successfully!';
     }else{
