@@ -481,16 +481,27 @@ async function createGoogleAccount(body) {
     // Wait for any transitions or animations to complete (if necessary)
     await sleep(500); // Optional delay to ensure transitions complete
     
-    const [button] = await page.$x("//button[contains(., 'I agree')]");
-    if (button){
-      // Scroll the button into view before clicking
-      await page.evaluate(button => {
-        button.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, button);
-      await button.click();
-    }else{
-      console.log('I Agree Button not found!');
-    }
+    // Wait for the "I agree" button to appear and ensure it's visible after scrolling into view
+    await page.waitForSelector('button', { timeout: 5000, visible: true });
+    
+    // Find the button with the text "I agree" using a CSS selector
+    const buttons = await page.$$('button');
+    const button = await page.evaluate((buttons) => {
+      // Find the button by its text content "I agree"
+      return buttons.find(button => button.textContent.includes('I agree')) || null;
+    }, buttons);
+    
+    if (!button) return "Button not found";
+    
+    // Scroll the button into view if it's in a scrollable area
+    await page.evaluate(button => {
+      button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, button);
+    
+    // Click the "I agree" button
+    await button.click();
+    console.log('I Agree Button Clicked');
+    console.log('Agreed Policy Done');
     
     // Optionally, wait for navigation after clicking the button with a shorter timeout
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
