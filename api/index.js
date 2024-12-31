@@ -469,10 +469,8 @@ async function createGoogleAccount(body) {
     
     // Wait for the "I agree" button to appear in the DOM with a shorter timeout
     await page.waitForSelector('button', { timeout: 2000 });
-  
-    // Use XPath to find the "I agree" button with its text content (with shorter timeout)
+    // Use XPath to find the "I agree" button with its text content
     const buttonXPath = "//button//*[text()[contains(., 'I agree')]]";
-    await page.waitForXPath(buttonXPath, { timeout: 2000 });
   
     // Get the "I agree" button using XPath
     const [iAgreeButton] = await page.$x(buttonXPath);
