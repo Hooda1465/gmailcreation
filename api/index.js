@@ -466,21 +466,26 @@ async function createGoogleAccount(body) {
       console.log('Next Button Clicked');      
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
     }    
-     // Wait for the "I agree" button to appear and ensure it's visible
-    await page.waitForSelector('div [data-primary-action-label="I agree"] button', { timeout: 5000, visible: true });
     
-    // Scroll the "I agree" button into view
+    // Wait for the "I agree" button to appear and ensure it's visible after scrolling into view
+    await page.waitForSelector('div[data-primary-action-label="I agree"] button', { timeout: 5000, visible: true });
+    
+    // Scroll the page to bring the "I agree" button into view (if it's not already visible)
     await page.evaluate(() => {
-      const button = document.querySelector('div [data-primary-action-label="I agree"] button');
+      const button = document.querySelector('div[data-primary-action-label="I agree"] button');
       if (button) {
         button.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     });
     
-    // Click the "I agree" button
-    await page.click('div [data-primary-action-label="I agree"] button');
-    console.log('I Agree Button Clicked');
-    console.log('Agreed Policy Done');
+    // Now click the "I agree" button
+    const iAgreeButton = await page.$('div[data-primary-action-label="I agree"] button');
+    if (iAgreeButton) {
+      await sleep(1000);
+      await iAgreeButton.click(); 
+      console.log('I Agree Button Clicked');
+      console.log('Agreed Policy Done');
+    }
     
     // Optionally, wait for the page to load after clicking the button
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
