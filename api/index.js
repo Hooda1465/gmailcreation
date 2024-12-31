@@ -466,29 +466,26 @@ async function createGoogleAccount(body) {
       console.log('Next Button Clicked');      
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
     }    
-     
      // Wait for the "I agree" button to appear and ensure it's visible
     await page.waitForSelector('div [data-primary-action-label="I agree"] button', { timeout: 5000, visible: true });
-  
-    // Get the "I agree" button
-    const iAgree = await page.$('div [data-primary-action-label="I agree"] button');
-  
-    if (iAgree) {
-      // Scroll the button into view before clicking
-      await page.evaluate((button) => {
-        button.scrollIntoView();
-      }, iAgree);
-  
-      // Click the "I agree" button
-      await iAgree.click();
-      console.log('I Agree Button Clicked');
-      console.log('Agreed Policy Done');
-    } else {
-      console.log('I Agree Button not found');
-    }
-  
+    
+    // Scroll the "I agree" button into view
+    await page.evaluate(() => {
+      const button = document.querySelector('div [data-primary-action-label="I agree"] button');
+      if (button) {
+        button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+    
+    // Click the "I agree" button
+    await page.click('div [data-primary-action-label="I agree"] button');
+    console.log('I Agree Button Clicked');
+    console.log('Agreed Policy Done');
+    
     // Optionally, wait for the page to load after clicking the button
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
+
+          
      return 'Google account creation completed successfully!';
     }else{
       return "code not received within timeout, so closed";
