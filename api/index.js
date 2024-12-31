@@ -467,23 +467,27 @@ async function createGoogleAccount(body) {
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
     }    
     
-    // Wait for the "I agree" button to appear in the DOM with a shorter timeout
-    await page.waitForSelector('button', { timeout: 2000 });
+    // Wait for the "I agree" button to appear and ensure it's visible after scrolling into view
+    await page.waitForSelector('div[data-primary-action-label="I agree"] button', { timeout: 2000, visible: true });
     
-     // Use page.$$ to find all button elements and filter them by text content
-    const buttons = await page.$$('button');
-    
-    // Find the button that contains "I agree" text
-    const iAgreeButton = buttons.find(button => button.textContent.includes('I agree'));
-  
-    if (iAgreeButton) {
-      // Scroll the button into view to ensure it's clickable
-      await page.evaluate(button => {
+    // Scroll the button into view if it's in a scrollable area
+    await page.evaluate(() => {
+      const button = document.querySelector('div[data-primary-action-label="I agree"] button');
+      if (button) {
         button.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, iAgreeButton);
-  
-      // Click the "I agree" button
-      await iAgreeButton.click();
+      }
+    });
+    
+    // Wait for any transitions or animations to complete (if necessary)
+    await page.waitForTimeout(500); // Optional delay to ensure transitions complete
+    
+    // Ensure the button is interactable before clicking (wait for visibility and interaction)
+    await page.waitForSelector('div[data-primary-action-label="I agree"] button', { visible: true, timeout: 2000 });
+    
+    // Click the "I agree" button with force (in case it's blocked by another element)
+    const iAgreeButton = await page.$('div[data-primary-action-label="I agree"] button');
+    if (iAgreeButton) {
+      await iAgreeButton.click({ force: true }); // Force click to bypass potential obstacles
       console.log('I Agree Button Clicked');
       console.log('Agreed Policy Done');
     } else {
