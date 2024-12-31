@@ -437,9 +437,9 @@ async function createGoogleAccount(body) {
     console.log('Code Selector found...');
     const code = await page.$('#code');
     await code.click({ clickCount: 2}); // Select the entire text field      
-    await sleep(500); 
+    await sleep(200); 
     await code.type(verificationCode,{ delay: 30})          
-    await sleep(500); // Wait 2 seconds before the next attempt
+    await sleep(200); // Wait 2 seconds before the next attempt
       
     //  await page.waitForSelector('#code', { visible: true });
     //  await page.type('#code', verificationCode, { delay: 60 });        
@@ -451,14 +451,14 @@ async function createGoogleAccount(body) {
      console.log('Next button on Code page clicked!');
            
      await page.waitForNavigation({ waitUntil: 'networkidle2' }); 
-     await page.waitForSelector('#recoverySkip');   
-     await sleep(200); 
+     await page.waitForSelector('#recoverySkip', { visible: true });   
+     await sleep(100); 
      await page.click('#recoverySkip');  
      console.log('Recovery Skipped');
      
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
       
-     await page.waitForSelector('div [data-primary-action-label="Next"] button', { timeout: 3000 });     
+     await page.waitForSelector('div [data-primary-action-label="Next"] button', { timeout: 2000 });     
      const nextButton = await page.$('div [data-primary-action-label="Next"] button');      
 
      if(nextButton){       
@@ -468,12 +468,13 @@ async function createGoogleAccount(body) {
     }    
     
     // Wait for the "I agree" button to appear and ensure it's visible after scrolling into view
-    await page.waitForSelector('div[data-primary-action-label="I agree"] button', { timeout: 5000, visible: true });
+    await page.waitForSelector('div[data-primary-action-label="I agree"] button', { visible: true });
     
     // Scroll the page to bring the "I agree" button into view (if it's not already visible)
     await page.evaluate(() => {
       const button = document.querySelector('div[data-primary-action-label="I agree"] button');
       if (button) {
+        console.log('Page Scrolled to I Agree Button');
         button.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     });
@@ -481,7 +482,7 @@ async function createGoogleAccount(body) {
     // Now click the "I agree" button
     const iAgreeButton = await page.$('div[data-primary-action-label="I agree"] button');
     if (iAgreeButton) {
-      await sleep(1000);
+      await sleep(200);
       await iAgreeButton.click(); 
       console.log('I Agree Button Clicked');
       console.log('Agreed Policy Done');
@@ -489,7 +490,6 @@ async function createGoogleAccount(body) {
     
     // Optionally, wait for the page to load after clicking the button
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
-
           
      return 'Google account creation completed successfully!';
     }else{
