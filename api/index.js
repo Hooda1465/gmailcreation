@@ -485,11 +485,11 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('button', { timeout: 5000, visible: true });
     
     // Find the button with the text "I agree" using a CSS selector
-    const buttons = await page.$$('button');
-    const button = await page.evaluate((buttons) => {
-      // Find the button by its text content "I agree"
+   // Find the button with the text "I agree" using a CSS selector
+    const button = await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('button'));
       return buttons.find(button => button.textContent.includes('I agree')) || null;
-    }, buttons);
+    });
     
     if (!button) return "Button not found";
     
