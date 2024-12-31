@@ -479,7 +479,7 @@ async function createGoogleAccount(body) {
     });
     
     // Wait for any transitions or animations to complete (if necessary)
-    await page.waitForTimeout(500); // Optional delay to ensure transitions complete
+    await sleep(500); // Optional delay to ensure transitions complete
     
     // Ensure the button is interactable before clicking (wait for visibility and interaction)
     await page.waitForSelector('div[data-primary-action-label="I agree"] button', { visible: true, timeout: 2000 });
