@@ -468,6 +468,7 @@ async function createGoogleAccount(body) {
     }    
      
      await page.waitForSelector('div [data-primary-action-label="I agree"] button', { timeout: 5000 });
+     console.log('I Agree button found');
      const iAgree = await page.$('div [data-primary-action-label="I agree"] button');
       
      if(iAgree){       
@@ -475,6 +476,7 @@ async function createGoogleAccount(body) {
        console.log('I Agree Button Clicked');
        console.log('Agreed Policy Done'); 
      }
+     await sleep(2000)
      return 'Google account creation completed successfully!';
     }else{
       return "code not received within timeout, so closed";
