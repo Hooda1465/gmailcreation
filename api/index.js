@@ -472,6 +472,7 @@ async function createGoogleAccount(body) {
   
     // Get the "I agree" button
     const iAgree = await page.$('div [data-primary-action-label="I agree"] button');
+    console.log(iAgree);
     
     if (iAgree) {
       // Click the "I agree" button
@@ -484,7 +485,6 @@ async function createGoogleAccount(body) {
   
     // Optionally, wait for the page to load after clicking the button
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
-    await sleep(500)
      return 'Google account creation completed successfully!';
     }else{
       return "code not received within timeout, so closed";
