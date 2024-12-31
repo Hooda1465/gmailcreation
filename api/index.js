@@ -467,12 +467,18 @@ async function createGoogleAccount(body) {
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
     }    
      
-     // Wait for the "I agree" button to appear
-    await page.waitForSelector('div [data-primary-action-label="I agree"] button', { timeout: 5000 });
+     // Wait for the "I agree" button to appear and ensure it's visible
+    await page.waitForSelector('div [data-primary-action-label="I agree"] button', { timeout: 5000, visible: true });
   
     // Get the "I agree" button
-    const iAgree = await page.$('div [data-primary-action-label="I agree"] button');    
+    const iAgree = await page.$('div [data-primary-action-label="I agree"] button');
+  
     if (iAgree) {
+      // Scroll the button into view before clicking
+      await page.evaluate((button) => {
+        button.scrollIntoView();
+      }, iAgree);
+  
       // Click the "I agree" button
       await iAgree.click();
       console.log('I Agree Button Clicked');
