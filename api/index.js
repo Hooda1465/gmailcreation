@@ -467,24 +467,32 @@ async function createGoogleAccount(body) {
      await page.waitForNavigation({ waitUntil: 'networkidle2' });
     }    
     
-    // Wait for the "I agree" button to appear and ensure it's visible
-    await page.waitForSelector('button:has-text("I agree")', { timeout: 3000, visible: true });
-    
-    // Scroll the page if necessary to ensure the button is in view
-    await page.evaluate(() => {
-      const button = document.querySelector('button:has-text("I agree")');
-      if (button) {
-        button.scrollIntoView();
-      }
-    });
-    
-    // Click the "I agree" button
-    await page.click('button:has-text("I agree")');
-    console.log('I Agree Button Clicked');
-    console.log('Agreed Policy Done');
-    
-    // Optionally, wait for the page to load after clicking the button
-    await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    // Wait for the "I agree" button to appear in the DOM with a shorter timeout
+    await page.waitForSelector('button', { timeout: 2000 });
+  
+    // Use XPath to find the "I agree" button with its text content (with shorter timeout)
+    const buttonXPath = "//button//*[text()[contains(., 'I agree')]]";
+    await page.waitForXPath(buttonXPath, { timeout: 2000 });
+  
+    // Get the "I agree" button using XPath
+    const [iAgreeButton] = await page.$x(buttonXPath);
+  
+    if (iAgreeButton) {
+      // Scroll the button into view to ensure it's clickable
+      await page.evaluate(button => {
+        button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, iAgreeButton);
+  
+      // Click the "I agree" button
+      await iAgreeButton.click();
+      console.log('I Agree Button Clicked');
+      console.log('Agreed Policy Done');
+    } else {
+      console.log('I Agree Button not found!');
+    }
+  
+    // Optionally, wait for navigation after clicking the button with a shorter timeout
+    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 1000 });
           
      return 'Google account creation completed successfully!';
     }else{
