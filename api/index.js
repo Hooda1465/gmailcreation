@@ -471,9 +471,7 @@ async function createGoogleAccount(body) {
     await page.waitForSelector('div [data-primary-action-label="I agree"] button', { timeout: 5000 });
   
     // Get the "I agree" button
-    const iAgree = await page.$('div [data-primary-action-label="I agree"] button');
-    console.log(iAgree);
-    
+    const iAgree = await page.$('div [data-primary-action-label="I agree"] button');    
     if (iAgree) {
       // Click the "I agree" button
       await iAgree.click();
