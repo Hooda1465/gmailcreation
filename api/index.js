@@ -446,67 +446,99 @@ async function createGoogleAccount(body) {
     //  await sleep(200); // Wait 2 seconds before the next attempt
      
     console.log('CODE ENTERED');
-     await page.waitForSelector('[data-is-touch-wrapper="true"] button');
-     await page.click('[data-is-touch-wrapper="true"] button');  
-     console.log('Next button on Code page clicked!');
-           
-     await page.waitForNavigation({ waitUntil: 'networkidle2' }); 
-     await page.waitForSelector('#recoverySkip', { visible: true });   
-     await sleep(100); 
-     await page.click('#recoverySkip');  
-     console.log('Recovery Skipped');
-     
-     await page.waitForNavigation({ waitUntil: 'networkidle2' });
-      
-     await page.waitForSelector('div [data-primary-action-label="Next"] button', { timeout: 2000 });     
-     const nextButton = await page.$('div [data-primary-action-label="Next"] button');      
 
-     if(nextButton){       
-      await page.click('div [data-primary-action-label="Next"] button');  
-      console.log('Next Button Clicked');      
-     await page.waitForNavigation({ waitUntil: 'networkidle2' });
-    }    
+await page.waitForSelector('#next');
+      console.log("Selector Next found")
+    await page.click('#next');
+
+    console.log('Next Code button clicked!');
+   
+    await page.waitForSelector('#recoverySkip');
+    console.log("Selector recovery found")
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 2 seconds
+    await page.click('#recoverySkip');
     
-    // Wait for the "I agree" button to appear and ensure it's visible after scrolling into view
-    await page.waitForSelector('div[data-primary-action-label="I agree"] button', { timeout: 2000, visible: true });
-    
-    // Scroll the button into view if it's in a scrollable area
-    await page.evaluate(() => {
-      const button = document.querySelector('div[data-primary-action-label="I agree"] button');
-      if (button) {
-        button.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    });
-    
-    // Wait for any transitions or animations to complete (if necessary)
-    await sleep(500); // Optional delay to ensure transitions complete
-    
-    // Wait for the "I agree" button to appear and ensure it's visible after scrolling into view
-    await page.waitForSelector('button', { timeout: 5000, visible: true });
-    
-    // Find the button with the text "I agree" using a CSS selector
-   // Find the button with the text "I agree" using a CSS selector
-    const button = await page.evaluate(() => {
-      const buttons = Array.from(document.querySelectorAll('button'));
-      return buttons.find(button => button.textContent.includes('I agree')) || null;
-    });
-    
-    if (!button) return "Button not found";
-    
-    // Scroll the button into view if it's in a scrollable area
-    await page.evaluate(button => {
-      button.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, button);
-    
-    // Click the "I agree" button
-    await button.click();
-    console.log('I Agree Button Clicked');
-    console.log('Agreed Policy Done');
-    
-    // Optionally, wait for navigation after clicking the button with a shorter timeout
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
+
+    await page.waitForSelector('div[data-primary-action-label="Next"] button');
+    console.log("Selector data primary Next found")
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 2 seconds
+    await page.click('div[data-primary-action-label="Next"] button');
+
+    await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    await page.waitForSelector('div [data-primary-action-label="I agree"] button');
+    console.log("Selector I Agree found")
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 2 seconds
+    await page.click('div [data-primary-action-label="I agree"] button');
+
+    console.log('Google account creation completed successfully!');
+
+
+
+
+
+      
+   //   await page.waitForSelector('[data-is-touch-wrapper="true"] button');
+   //   await page.click('[data-is-touch-wrapper="true"] button');  
+   //   console.log('Next button on Code page clicked!');
+           
+   //   await page.waitForNavigation({ waitUntil: 'networkidle2' }); 
+   //   await page.waitForSelector('#recoverySkip', { visible: true });   
+   //   await sleep(100); 
+   //   await page.click('#recoverySkip');  
+   //   console.log('Recovery Skipped');
+     
+   //   await page.waitForNavigation({ waitUntil: 'networkidle2' });
+      
+   //   await page.waitForSelector('div [data-primary-action-label="Next"] button', { timeout: 2000 });     
+   //   const nextButton = await page.$('div [data-primary-action-label="Next"] button');      
+
+   //   if(nextButton){       
+   //    await page.click('div [data-primary-action-label="Next"] button');  
+   //    console.log('Next Button Clicked');      
+   //   await page.waitForNavigation({ waitUntil: 'networkidle2' });
+   //  }    
+    
+   //  // Wait for the "I agree" button to appear and ensure it's visible after scrolling into view
+   //  await page.waitForSelector('div[data-primary-action-label="I agree"] button', { timeout: 2000, visible: true });
+    
+   //  // Scroll the button into view if it's in a scrollable area
+   //  await page.evaluate(() => {
+   //    const button = document.querySelector('div[data-primary-action-label="I agree"] button');
+   //    if (button) {
+   //      button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+   //    }
+   //  });
+    
+   //  // Wait for any transitions or animations to complete (if necessary)
+   //  await sleep(500); // Optional delay to ensure transitions complete
+    
+   //  // Wait for the "I agree" button to appear and ensure it's visible after scrolling into view
+   //  await page.waitForSelector('button', { timeout: 5000, visible: true });
+    
+   //  // Find the button with the text "I agree" using a CSS selector
+   // // Find the button with the text "I agree" using a CSS selector
+   //  const button = await page.evaluate(() => {
+   //    const buttons = Array.from(document.querySelectorAll('button'));
+   //    return buttons.find(button => button.textContent.includes('I agree')) || null;
+   //  });
+    
+   //  if (!button) return "Button not found";
+    
+   //  // Scroll the button into view if it's in a scrollable area
+   //  await page.evaluate(button => {
+   //    button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+   //  }, button);
+    
+   //  // Click the "I agree" button
+   //  await button.click();
+   //  console.log('I Agree Button Clicked');
+   //  console.log('Agreed Policy Done');
+    
+   //  // Optionally, wait for navigation after clicking the button with a shorter timeout
+   //  await page.waitForNavigation({ waitUntil: 'networkidle2' });
           
-     return 'Google account creation completed successfully!';
+   //   return 'Google account creation completed successfully!';
     }else{
       return "code not received within timeout, so closed";
     }
