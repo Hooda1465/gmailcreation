@@ -429,55 +429,48 @@ async function createGoogleAccount(body) {
     // await page.waitForSelector('[data-is-touch-wrapper="true"] button');
     // await page.click('[data-is-touch-wrapper="true"] button'); 
 
-
     const verificationCode = await waitForVerificationCode(mobile, apiKey, email);
     if(verificationCode && verificationCode!=null){
-     console.log(`Code ${verificationCode} found and Entering the verification code now`);
-    await page.waitForSelector('#code',  { visible: true });   
-    console.log('Code Selector found...');
-    const code = await page.$('#code');
-    await code.click({ clickCount: 2}); // Select the entire text field      
-    await sleep(200); 
-    await code.type(verificationCode,{ delay: 30})          
-    await sleep(200); // Wait 2 seconds before the next attempt
-      
-    //  await page.waitForSelector('#code', { visible: true });
-    //  await page.type('#code', verificationCode, { delay: 60 });        
-    //  await sleep(200); // Wait 2 seconds before the next attempt
-     
-    console.log('CODE ENTERED');
-
-await page.waitForSelector('#next');
+      console.log(`Code ${verificationCode} found and Entering the verification code now`);
+      await page.waitForSelector('#code',  { visible: true });   
+      console.log('Code Selector found...');
+      const code = await page.$('#code');
+      await code.click({ clickCount: 2}); // Select the entire text field      
+      await sleep(200); 
+      await code.type(verificationCode,{ delay: 30})          
+      await sleep(200); // Wait 2 seconds before the next attempt
+        
+      //  await page.waitForSelector('#code', { visible: true });
+      //  await page.type('#code', verificationCode, { delay: 60 });        
+      //  await sleep(200); // Wait 2 seconds before the next attempt
+       
+      console.log('CODE ENTERED');
+  
+      await page.waitForSelector('#next');
       console.log("Selector Next found")
-    await page.click('#next');
+      await page.click('#next');  
+      console.log('Next Code button clicked!');     
 
-    console.log('Next Code button clicked!');
-   
-    await page.waitForSelector('#recoverySkip');
-    console.log("Selector recovery found")
-    await new Promise(resolve => setTimeout(resolve, 2000)); // 2 seconds
-    await page.click('#recoverySkip');
-    
-    await page.waitForNavigation({ waitUntil: 'networkidle2' });
-
-    await page.waitForSelector('div[data-primary-action-label="Next"] button');
-    console.log("Selector data primary Next found")
-    await new Promise(resolve => setTimeout(resolve, 2000)); // 2 seconds
-    await page.click('div[data-primary-action-label="Next"] button');
-
-    await page.waitForNavigation({ waitUntil: 'networkidle2' });
-    await page.waitForSelector('div [data-primary-action-label="I agree"] button');
-    console.log("Selector I Agree found")
-    await new Promise(resolve => setTimeout(resolve, 1000)); // 2 seconds
-    await page.click('div [data-primary-action-label="I agree"] button');
-
-    console.log('Google account creation completed successfully!');
-
-
-
-
-
-      
+      //STEP - RECOVERY PAGE
+      await page.waitForSelector('#recoverySkip');
+      console.log("Selector recovery found")
+      await new Promise(resolve => setTimeout(resolve, 700)); // 2 seconds
+      await page.click('#recoverySkip');      
+      await page.waitForNavigation({ waitUntil: 'networkidle2' });
+  
+      await page.waitForSelector('div[data-primary-action-label="Next"] button');
+      console.log("Selector data primary Next found")
+      await new Promise(resolve => setTimeout(resolve, 700)); // 2 seconds
+      await page.click('div[data-primary-action-label="Next"] button');
+  
+      await page.waitForNavigation({ waitUntil: 'networkidle2' });
+      await page.waitForSelector('div [data-primary-action-label="I agree"] button');
+      console.log("Selector I Agree found")
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 2 seconds
+      await page.click('div [data-primary-action-label="I agree"] button');
+  
+      console.log('Google account creation completed successfully!');
+        
    //   await page.waitForSelector('[data-is-touch-wrapper="true"] button');
    //   await page.click('[data-is-touch-wrapper="true"] button');  
    //   console.log('Next button on Code page clicked!');
