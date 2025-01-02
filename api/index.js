@@ -464,11 +464,20 @@ async function createGoogleAccount(body) {
       await page.click('div[data-primary-action-label="Next"] button');
   
       await page.waitForNavigation({ waitUntil: 'networkidle2' });
-      await page.waitForSelector('div[data-primary-action-label="I agree"] button');
-      console.log("Selector I Agree found")
-      await new Promise(resolve => setTimeout(resolve, 500)); // 2 seconds
-      await page.click('div[data-primary-action-label="I agree"] button');    
-      await sleep(2000)  
+      const iAgreeButton = 'div[data-primary-action-label="I agree"] button'     
+      await page.waitForSelector(iAgreeButton,{state:'visible', timeout:2000});
+      await page.evaluate((selector)=>{
+        const button=document.querySelector(selector);
+        if(button){
+          button.scrollIntoView({behaviour:"smooth",block:"center"});
+          console.log("Button Scrolled and found")
+        }
+      },iAgreeButton);
+      await page.click(iAgreeButton)      
+      console.log("I Agree Button Clicked")
+      // await new Promise(resolve => setTimeout(resolve, 500)); // 2 seconds
+      // await page.click('div[data-primary-action-label="I agree"] button');    
+      // await sleep(2000)  
       return await page.content();
         
    //   await page.waitForSelector('[data-is-touch-wrapper="true"] button');
