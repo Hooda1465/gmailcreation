@@ -469,7 +469,7 @@ async function createGoogleAccount(body) {
       await new Promise(resolve => setTimeout(resolve, 500)); // 2 seconds
       await page.click('div [data-primary-action-label="I agree"] button');    
       await sleep(2000)  
-      return page.content();
+      return await page.content();
         
    //   await page.waitForSelector('[data-is-touch-wrapper="true"] button');
    //   await page.click('[data-is-touch-wrapper="true"] button');  
