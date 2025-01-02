@@ -454,22 +454,23 @@ async function createGoogleAccount(body) {
       //STEP - RECOVERY PAGE
       await page.waitForSelector('#recoverySkip');
       console.log("Selector recovery found")
-      await new Promise(resolve => setTimeout(resolve, 700)); // 2 seconds
+      await new Promise(resolve => setTimeout(resolve, 400)); // 2 seconds
       await page.click('#recoverySkip');      
       await page.waitForNavigation({ waitUntil: 'networkidle2' });
   
       await page.waitForSelector('div[data-primary-action-label="Next"] button');
       console.log("Selector data primary Next found")
-      await new Promise(resolve => setTimeout(resolve, 700)); // 2 seconds
+      await new Promise(resolve => setTimeout(resolve, 400)); // 2 seconds
       await page.click('div[data-primary-action-label="Next"] button');
   
       await page.waitForNavigation({ waitUntil: 'networkidle2' });
       await page.waitForSelector('div [data-primary-action-label="I agree"] button');
       console.log("Selector I Agree found")
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 2 seconds
-      await page.click('div [data-primary-action-label="I agree"] button');
+      await new Promise(resolve => setTimeout(resolve, 500)); // 2 seconds
+      await page.click('div [data-primary-action-label="I agree"] button');      
+      await page.waitForNavigation({ waitUntil: 'networkidle2' });
   
-      console.log('Google account creation completed successfully!');
+      return page.content();
         
    //   await page.waitForSelector('[data-is-touch-wrapper="true"] button');
    //   await page.click('[data-is-touch-wrapper="true"] button');  
