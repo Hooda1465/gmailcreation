@@ -467,9 +467,8 @@ async function createGoogleAccount(body) {
       await page.waitForSelector('div [data-primary-action-label="I agree"] button');
       console.log("Selector I Agree found")
       await new Promise(resolve => setTimeout(resolve, 500)); // 2 seconds
-      await page.click('div [data-primary-action-label="I agree"] button');      
-      await page.waitForNavigation({ waitUntil: 'networkidle2' });
-  
+      await page.click('div [data-primary-action-label="I agree"] button');    
+      await sleep(2000)  
       return page.content();
         
    //   await page.waitForSelector('[data-is-touch-wrapper="true"] button');
